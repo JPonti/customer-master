@@ -1,0 +1,7 @@
+config {
+  type: "incremental"
+}
+
+SELECT * 
+from ${ref("base_customer_accounts")}
+${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}

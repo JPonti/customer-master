@@ -2,5 +2,5 @@
     "warehouse": "bigquery",
     "defaultSchema": "dataform",
     "assertionSchema": "dataform_assertions",
-    "defaultDatabase": "data-insights-176500"
+    "defaultDatabase": "data-pipeline-241307"
 }
