@@ -2,6 +2,17 @@ config {
   type: "incremental"
 }
 
+
+-- config {
+--   type: "incremental",
+--    uniqueKey: ["firebase_id"],
+--    bigquery: {
+--     partitionBy: "registration_date",
+--     updatePartitionFilter:
+--         "registration_date >= date_sub(current_date(), interval 1 DAY)"
+--   }
+-- }
+
 SELECT * 
-from ${ref("base_customer_accounts")}
+from ${ref("dim_customer_accounts_view")}
 ${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}

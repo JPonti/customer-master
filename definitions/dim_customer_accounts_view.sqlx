@@ -1,0 +1,7 @@
+config {
+  type: "view"
+}
+
+SELECT * 
+from ${ref("dim_shopee_accounts")}
+-- where registration_date > (select max(registration_date) from ${self()})

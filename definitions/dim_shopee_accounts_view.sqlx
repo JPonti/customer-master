@@ -1,0 +1,31 @@
+config {
+  type: "view"
+}
+
+-- select *
+-- from 
+--   ${ref("table_name")} / schema.table_name
+-- read more about ref() in the documentation tab -->
+SELECT
+--   GENERATE_UUID() as customer_guid,
+    CASE
+        WHEN o.party_id IN (6,317799,661556) THEN SAFE_CAST(JSON_EXTRACT_SCALAR(metadata,'$.shop_id') AS INT64)
+        ELSE o.party_id
+    END AS account_id,
+    '' as firebase_id,
+    CASE WHEN o.party_id IN (9) THEN 'buyer'
+        WHEN o.party_id IN (6,317799,661556,323063, 323064,683375, 215744) THEN 'merchant' 
+        ELSE NULL END as customer_type,
+    MIN(DATE(o.created_at)) as registration_date,  
+--     CASE
+--         WHEN o.party_id IN (6,317799,661556) THEN  'Shopee'
+--         WHEN o.party_id = 215744 THEN 'Lazada'
+--         WHEN o.party_id = 9 THEN 'ShippingCart'
+--         WHEN o.party_id IN (323063,323064 )  THEN 'LBC Online'
+--         WHEN o.party_id = 683375 THEN 'LBC Express Integration'
+--     END AS product,
+    org.name as product
+FROM `data-pipeline-241307.base_f3.consumer_orders` o
+JOIN `data-pipeline-241307.base_f3.core_organizations` org ON org.party_id = o.service_id
+WHERE o.party_id IN (6,317799,661556)
+GROUP BY 1,2,3,5

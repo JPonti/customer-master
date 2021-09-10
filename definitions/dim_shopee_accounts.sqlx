@@ -1,0 +1,17 @@
+config {
+  type: "incremental",
+  uniqueKey: ["account_id"],
+  bigquery: {
+    partitionBy: "registration_date",
+    updatePartitionFilter:
+        "registration_date >= date_sub(current_date(), interval 1 DAY)"
+  }
+}
+
+-- select *
+-- from ${ref("source_table")}
+-- ${when(incremental(), `where timestamp > (select max(timestamp) from ${self()})`)}
+
+SELECT * 
+from ${ref("dim_shopee_accounts_view")}
+${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}
