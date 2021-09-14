@@ -7,6 +7,6 @@ config {
 }
 
 SELECT * 
-from ${ref("dim_xpost_accounts_view")}
+from ${ref("dim_paylink_accounts_view")}
 -- ${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}
 ${when(incremental(), `where registration_date >= current_date()`)}

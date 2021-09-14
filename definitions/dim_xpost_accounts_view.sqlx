@@ -8,7 +8,7 @@ SELECT
 FROM (
 SELECT
   p.id AS account_id,
-  p.external_id as firebase_id,
+  COALESCE(p.external_id,'') as firebase_id,
   'merchant' as customer_type,
   DATE(p.created_at) as registration_date,
   CASE WHEN DATE(p.created_at, 'Asia/Manila') >=  '2021-03-22' THEN 'GGX Biz' ELSE o.name END as product
@@ -20,7 +20,7 @@ WHERE product IS NOT NULL
 UNION DISTINCT
 SELECT
   p.id AS account_id,
-  NULL as firebase_id,
+  '' as firebase_id,
   'merchant' as customer_type,
   DATE(p.created_at) as registration_date,
   CASE WHEN DATE(p.created_at,'Asia/Manila') >= '2021-03-22' THEN 'GGX Biz' ELSE 'XPost' END as product

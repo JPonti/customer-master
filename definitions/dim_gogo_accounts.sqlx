@@ -2,12 +2,15 @@ config {
   type: "incremental",
   uniqueKey: ["firebase_id"],
   bigquery: {
-    partitionBy: "registration_date",
-    updatePartitionFilter:
-        "registration_date >= date_sub(current_date(), interval 1 DAY)"
+    partitionBy: "registration_date"
+
   }
 }
 
+    -- updatePartitionFilter:
+    --     "registration_date >= date_sub(current_date(), interval 1 DAY)"
+
 SELECT * 
 from ${ref("dim_gogo_accounts_view")}
-${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}
+-- ${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}
+${when(incremental(), `where registration_date >= current_date()`)}

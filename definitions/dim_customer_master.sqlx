@@ -2,6 +2,12 @@ config {
   type: "incremental"
 }
 
-SELECT * 
+/* creates new customer_guid when there is new registration*/
+
+SELECT 
+  GENERATE_UUID() as customer_guid,
+  account_id,
+  firebase_id,
+  earliest_registration_date as registration_date 
 from ${ref("dim_customer_master_view")}
-${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}
+${when(incremental(), `where latest_registration_date > (select max(latest_registration_date) from ${self()})`)}

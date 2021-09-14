@@ -4,7 +4,7 @@ config {
 
 #XPay
 SELECT
-  p.id AS account_id,
+  COALESCE(p.id,0) AS account_id,
   COALESCE(f.user_id,p.uid ) as firebase_id,
   'user' as customer_type,
   COALESCE(DATE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_xpay ,1,25))), DATE(TIMESTAMP_MICROS(CAST(p.created_date AS INT)))) as registration_date,

@@ -1,28 +1,46 @@
 config {
   type: "view"
 }
-/*for creating new customer master*/
-SELECT
-  GENERATE_UUID() as customer_guid,
-  account_id,
-  firebase_id,
-  registration_date
-FROM (
+/*list of distinct customers*/
 SELECT
   account_id,
   '' as  firebase_id,
-  MIN(registration_date) as registration_date
-FROM ${ref("dim_customer_accounts")}
-WHERE product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)')
+  MIN(registration_date) as earliest_registration_date,
+  MAX(registration_date) as latest_registration_date
+FROM 
+(
+  SELECT * 
+  from ${ref("dim_shopee_accounts")}
+  UNION DISTINCT
+  SELECT * 
+  from ${ref("dim_xpost_accounts")}
+)
+WHERE product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost')
+    AND COALESCE(firebase_id,'') =''
 GROUP BY 1
 UNION DISTINCT
 SELECT
   NULL as account_id,
   firebase_id,
-  MIN(registration_date) as registration_date
-FROM ${ref("dim_customer_accounts")}
-WHERE product IN ('GOGO', 'XPay')
-GROUP BY 1,2
+  MIN(registration_date) as earliest_registration_date,
+  MAX(registration_date) as latest_registration_date
+FROM 
+(
+  SELECT * 
+  from ${ref("dim_gogo_accounts")}
+  UNION DISTINCT
+  SELECT * 
+  from ${ref("dim_xpay_accounts")}
+  UNION DISTINCT
+  SELECT * 
+  from ${ref("dim_paylink_accounts")}
+  UNION DISTINCT
+  SELECT * 
+  from ${ref("dim_xpost_accounts")}
 )
--- where registration_date > (select max(registration_date) from ${self()})
+WHERE product IN ('GOGO', 'XPay', 'XPost', 'Paylink', 'GGX Biz')
+GROUP BY 1,2
  
+
+
+
