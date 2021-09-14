@@ -1,0 +1,36 @@
+config {
+  type: "view"
+}
+
+#XPOST
+SELECT
+  *
+FROM (
+SELECT
+  p.id AS account_id,
+  p.external_id as firebase_id,
+  'merchant' as customer_type,
+  DATE(p.created_at) as registration_date,
+  CASE WHEN DATE(p.created_at, 'Asia/Manila') >=  '2021-03-22' THEN 'GGX Biz' ELSE o.name END as product
+FROM `data-pipeline-241307.base_f3.core_parties` p 
+JOIN `data-pipeline-241307.base_f3.core_relationships` r ON r.from_party_id = p.id AND r.to_party_id = 3658
+JOIN `data-pipeline-241307.base_f3.core_organizations` o ON o.party_id = r.to_party_id
+)
+WHERE product IS NOT NULL
+UNION DISTINCT
+SELECT
+  p.id AS account_id,
+  NULL as firebase_id,
+  'merchant' as customer_type,
+  DATE(p.created_at) as registration_date,
+  CASE WHEN DATE(p.created_at,'Asia/Manila') >= '2021-03-22' THEN 'GGX Biz' ELSE 'XPost' END as product
+FROM `data-pipeline-241307.base_f3.core_parties` p
+JOIN `data-pipeline-241307.base_f3.core_organizations` o ON o.party_id = p.id
+JOIN `data-pipeline-241307.base_f3.core_party_roles` pr ON pr.party_id = p.id 
+LEFT JOIN `data-pipeline-241307.base_f3.core_relationships` rf ON rf.from_party_id = p.id AND rf.type = 'merchant_of'
+LEFT JOIN `data-pipeline-241307.base_f3.core_relationships` rt ON rt.to_party_id = p.id AND rt.type = 'merchant_of'
+WHERE rf.id IS NULL
+  AND rt.id IS NULL
+  AND p.id NOT IN (6,7,8,9,19,70189,70190,70191,87654,215744,317799,323063,323064,661556,683375)
+  AND o.party_id IS NOT NULL
+  AND pr.role_id = 4

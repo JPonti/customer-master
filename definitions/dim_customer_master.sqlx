@@ -3,5 +3,5 @@ config {
 }
 
 SELECT * 
-from ${ref("dim_customer_accounts_view")}
+from ${ref("dim_customer_master_view")}
 ${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}

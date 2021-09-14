@@ -1,6 +1,6 @@
 config {
   type: "incremental",
-  uniqueKey: ["account_id"],
+  uniqueKey: ["firebase_id"],
   bigquery: {
     partitionBy: "registration_date",
     updatePartitionFilter:
@@ -9,5 +9,5 @@ config {
 }
 
 SELECT * 
-from ${ref("dim_shopee_accounts_view")}
+from ${ref("dim_xpay_accounts_view")}
 ${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}

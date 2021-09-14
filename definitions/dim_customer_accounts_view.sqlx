@@ -4,4 +4,12 @@ config {
 
 SELECT * 
 from ${ref("dim_shopee_accounts")}
--- where registration_date > (select max(registration_date) from ${self()})
+UNION DISTINCT
+SELECT * 
+from ${ref("dim_gogo_accounts")}
+UNION DISTINCT
+SELECT * 
+from ${ref("dim_xpay_accounts")}
+UNION DISTINCT
+SELECT * 
+from ${ref("dim_xpost_accounts")}

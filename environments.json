@@ -5,11 +5,29 @@
       "configOverride": {},
       "schedules": [
         {
-          "name": "new_schedule",
-          "cron": "56 10 * * *"
+          "name": "daily project refresh",
+          "cron": "0 8 * * mon,tue,wed,thu,fri,sat,sun",
+          "options": {
+            "fullRefresh": false
+          },
+          "disabled": false,
+          "notify": [
+            {
+              "channel": "xa-dataform",
+              "statuses": [
+                "SUCCESS",
+                "FAILURE"
+              ]
+            }
+          ]
         }
       ],
       "gitRef": "master"
+    }
+  ],
+  "notificationChannels": [
+    {
+      "name": "xa-dataform"
     }
   ]
 }

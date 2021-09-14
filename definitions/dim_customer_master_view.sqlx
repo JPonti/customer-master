@@ -1,0 +1,28 @@
+config {
+  type: "view"
+}
+/*for creating new customer master*/
+SELECT
+  GENERATE_UUID() as customer_guid,
+  account_id,
+  firebase_id,
+  registration_date
+FROM (
+SELECT
+  account_id,
+  '' as  firebase_id,
+  MIN(registration_date) as registration_date
+FROM ${ref("dim_customer_accounts")}
+WHERE product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)')
+GROUP BY 1
+UNION DISTINCT
+SELECT
+  NULL as account_id,
+  firebase_id,
+  MIN(registration_date) as registration_date
+FROM ${ref("dim_customer_accounts")}
+WHERE product IN ('GOGO', 'XPay')
+GROUP BY 1,2
+)
+-- where registration_date > (select max(registration_date) from ${self()})
+ 
