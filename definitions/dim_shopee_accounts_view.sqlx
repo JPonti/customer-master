@@ -8,11 +8,12 @@ SELECT
         WHEN o.party_id IN (6,317799,661556) THEN SAFE_CAST(JSON_EXTRACT_SCALAR(metadata,'$.shop_id') AS INT64)
         ELSE o.party_id
     END AS account_id,
-    '' as firebase_id,
+    CAST(NULL AS STRING) as firebase_id,
     CASE WHEN o.party_id IN (9) THEN 'buyer'
         WHEN o.party_id IN (6,317799,661556,323063, 323064,683375, 215744) THEN 'merchant' 
         ELSE NULL END as customer_type,
-    MIN(DATE(o.created_at)) as registration_date,  
+    MIN(DATE(o.created_at, 'Asia/Manila')) as registration_date,  
+    MIN(DATETIME(o.created_at, 'Asia/Manila')) as registration_time,  
 --     CASE
 --         WHEN o.party_id IN (6,317799,661556) THEN  'Shopee'
 --         WHEN o.party_id = 215744 THEN 'Lazada'
@@ -24,4 +25,4 @@ SELECT
 FROM `data-pipeline-241307.base_f3.consumer_orders` o
 JOIN `data-pipeline-241307.base_f3.core_organizations` org ON org.party_id = o.service_id
 WHERE o.party_id IN (6,317799,661556)
-GROUP BY 1,2,3,5
+GROUP BY 1,2,3,6

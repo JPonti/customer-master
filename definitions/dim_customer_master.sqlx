@@ -10,4 +10,4 @@ SELECT
   firebase_id,
   earliest_registration_date as registration_date 
 from ${ref("dim_customer_master_view")}
-${when(incremental(), `where latest_registration_date > (select max(latest_registration_date) from ${self()})`)}
+${when(incremental(), `where latest_registration_time > (select max(latest_registration_time) from ${self()})`)}

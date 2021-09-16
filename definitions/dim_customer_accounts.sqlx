@@ -2,10 +2,14 @@ config {
   type: "incremental",
   uniqueKey: ["firebase_id","account_id","product"],
   bigquery: {
-    partitionBy: "registration_date"
+    partitionBy: "registration_date",
+    updatePartitionFilter:
+        "registration_date >= date_sub(current_date(), interval 1 DAY)"
   }
 }
-/* get customer_guid from customer_master*/
+/*NOTES: 
+1. gets customer_guid from customer_master
+2. gogo firebase_id without product not included here, will be added once firebase is present in base_f3 core parties*/
 
 SELECT 
   m.customer_guid as customer_guid,
@@ -13,8 +17,7 @@ SELECT
 from ${ref("dim_customer_accounts_view")} a
 LEFT JOIN ${ref("dim_customer_master")} m ON a.firebase_id = m.firebase_id
 WHERE a.product IN ('GOGO', 'XPay', 'XPost', 'Paylink', 'GGX Biz')
-
--- ${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}
+  AND a.firebase_id IS NOT NULL
 ${when(incremental(), `AND a.registration_date >= current_date()`)}
 
 UNION DISTINCT 
@@ -24,7 +27,6 @@ SELECT
   a.*
 from ${ref("dim_customer_accounts_view")} a
 LEFT JOIN ${ref("dim_customer_master")} m ON a.account_id = m.account_id
-WHERE a.product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost')
-  AND COALESCE(a.firebase_id,'') =''
--- ${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}
+WHERE a.product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost', 'GGX Biz', 'CMO')
+  AND a.firebase_id IS NULL AND a.account_id IS NOT NULL
 ${when(incremental(), `AND a.registration_date >= current_date()`)}

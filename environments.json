@@ -6,7 +6,7 @@
       "schedules": [
         {
           "name": "daily project refresh",
-          "cron": "0 8 * * mon,tue,wed,thu,fri,sat,sun",
+          "cron": "0 16 * * mon,tue,wed,thu,fri,sat,sun",
           "options": {
             "fullRefresh": false
           },

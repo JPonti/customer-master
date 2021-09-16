@@ -2,7 +2,9 @@ config {
   type: "incremental",
   uniqueKey: ["firebase_id"],
   bigquery: {
-    partitionBy: "registration_date"
+    partitionBy: "registration_date",
+    updatePartitionFilter:
+        "registration_date >= date_sub(current_date(), interval 1 DAY)"
   }
 }
 

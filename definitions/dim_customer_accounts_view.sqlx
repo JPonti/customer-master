@@ -16,3 +16,6 @@ from ${ref("dim_xpost_accounts")}
 UNION DISTINCT
 SELECT * 
 from ${ref("dim_paylink_accounts")}
+UNION DISTINCT
+SELECT * 
+from ${ref("dim_cmo_accounts")}
