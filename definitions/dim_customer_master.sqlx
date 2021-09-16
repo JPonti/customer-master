@@ -28,6 +28,7 @@ FROM (
   )
   WHERE product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost','GGX Biz', 'CMO')
       AND firebase_id IS NULL AND account_id IS NOT NULL
+      AND account_id NOT IN (SELECT account_id FROM ${self()})
   GROUP BY 1
   UNION DISTINCT
   SELECT
@@ -51,7 +52,8 @@ FROM (
   )
   WHERE product IN ('GOGO', 'XPay', 'XPost', 'Paylink', 'GGX Biz', CAST(NULL AS STRING))
     AND firebase_id IS NOT NULL
+    AND firebase_id NOT IN (SELECT firebase_id FROM ${self()})
   GROUP BY 1,2
 )
-${when(incremental(), `where latest_registration_time > (select max(latest_registration_time) from ${self()})`)}
--- ${when(incremental(), `where latest_registration_date > CURRENT_DATE()`)}
+-- ${when(incremental(), `where latest_registration_time > (select max(latest_registration_time) from ${self()})`)}
+${when(incremental(), `where latest_registration_date > CURRENT_DATE()`)}
