@@ -5,12 +5,8 @@
       "configOverride": {},
       "schedules": [
         {
-          "name": "daily project refresh",
-          "cron": "0 16 * * mon,tue,wed,thu,fri,sat,sun",
-          "options": {
-            "fullRefresh": false
-          },
-          "disabled": false,
+          "name": "new_schedule",
+          "cron": "0 16 * * *",
           "notify": [
             {
               "channel": "xa-dataform",
