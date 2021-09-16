@@ -10,4 +10,4 @@ config {
 
 SELECT * 
 from ${ref("dim_paylink_accounts_view")}
-${when(incremental(), `where registration_date >= current_date()`)}
+${when(incremental(), `where registration_date >= CURRENT_DATE('Asia/Manila')`)}
