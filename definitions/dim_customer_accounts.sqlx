@@ -15,23 +15,23 @@ SELECT
   m.customer_guid as customer_guid,
   a.*
 FROM (
-  SELECT * from ${ref("dim_shopee_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_shopee_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   UNION DISTINCT
-  SELECT * from ${ref("dim_gogo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_gogo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   UNION DISTINCT
-  SELECT * from ${ref("dim_xpay_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_xpay_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   UNION DISTINCT
-  SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   UNION DISTINCT
-  SELECT * from ${ref("dim_paylink_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_paylink_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   UNION DISTINCT
-  SELECT * from ${ref("dim_cmo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_cmo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   ) a
 -- from ${ref("dim_customer_accounts_view")} a
 LEFT JOIN ${ref("dim_customer_master")} m ON a.firebase_id = m.firebase_id
 WHERE a.product IN ('GOGO', 'XPay', 'XPost', 'Paylink', 'GGX Biz')
   AND a.firebase_id IS NOT NULL
-${when(incremental(), `AND a.registration_date >= current_date()`)}
+${when(incremental(), `AND a.registration_date >= CURRENT_DATE('Asia/Manila')`)}
 
 UNION DISTINCT 
 
@@ -39,20 +39,20 @@ SELECT
   m.customer_guid as customer_guid,
   a.*
 FROM (
-  SELECT * from ${ref("dim_shopee_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_shopee_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   UNION DISTINCT
-  SELECT * from ${ref("dim_gogo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_gogo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   UNION DISTINCT
-  SELECT * from ${ref("dim_xpay_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_xpay_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   UNION DISTINCT
-  SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   UNION DISTINCT
-  SELECT * from ${ref("dim_paylink_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_paylink_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   UNION DISTINCT
-  SELECT * from ${ref("dim_cmo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  SELECT * from ${ref("dim_cmo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
   ) a
 -- from ${ref("dim_customer_accounts_view")} a
 LEFT JOIN ${ref("dim_customer_master")} m ON a.account_id = m.account_id
 WHERE a.product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost', 'GGX Biz', 'CMO')
   AND a.firebase_id IS NULL AND a.account_id IS NOT NULL
-${when(incremental(), `AND a.registration_date >= current_date()`)}
+${when(incremental(), `AND a.registration_date >= CURRENT_DATE('Asia/Manila')`)}
