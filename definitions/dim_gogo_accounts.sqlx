@@ -12,4 +12,4 @@ config {
 SELECT * 
 from ${ref("dim_gogo_accounts_view")}
 -- ${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}
-${when(incremental(), `where registration_time >= (select max(registration_time) from ${self()})`)}
+${when(incremental(), `where registration_date >= current_date()`)}

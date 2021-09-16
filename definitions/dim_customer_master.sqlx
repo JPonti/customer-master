@@ -9,5 +9,49 @@ SELECT
   account_id,
   firebase_id,
   earliest_registration_date as registration_date 
-from ${ref("dim_customer_master_view")}
+-- from ${ref("dim_customer_master_view")}
+FROM (
+  SELECT
+    account_id,
+    CAST(NULL AS STRING) as  firebase_id,
+    MIN(registration_date) as earliest_registration_date,
+    MAX(registration_date) as latest_registration_date,
+    MIN(registration_time) as earliest_registration_time,
+    MAX(registration_time) as latest_registration_time
+  FROM 
+  (
+    SELECT * from ${ref("dim_shopee_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+    UNION DISTINCT
+    SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+    UNION DISTINCT
+    SELECT * from ${ref("dim_cmo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  )
+  WHERE product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost','GGX Biz', 'CMO')
+      AND firebase_id IS NULL AND account_id IS NOT NULL
+  GROUP BY 1
+  UNION DISTINCT
+  SELECT
+    NULL as account_id,
+    firebase_id,
+    MIN(registration_date) as earliest_registration_date,
+    MAX(registration_date) as latest_registration_date,
+    MIN(registration_time) as earliest_registration_time,
+    MAX(registration_time) as latest_registration_time
+  FROM 
+  (
+    SELECT * from ${ref("dim_gogo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+    UNION DISTINCT
+    SELECT * from ${ref("dim_xpay_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+    UNION DISTINCT
+    SELECT * from ${ref("dim_paylink_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+    UNION DISTINCT
+    SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+    UNION DISTINCT
+    SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE()`)}
+  )
+  WHERE product IN ('GOGO', 'XPay', 'XPost', 'Paylink', 'GGX Biz', CAST(NULL AS STRING))
+    AND firebase_id IS NOT NULL
+  GROUP BY 1,2
+)
 ${when(incremental(), `where latest_registration_time > (select max(latest_registration_time) from ${self()})`)}
+-- ${when(incremental(), `where latest_registration_date > CURRENT_DATE()`)}
