@@ -8,11 +8,13 @@ SELECT
   COALESCE(f.user_id,p.uid ) as firebase_id,
   'user' as customer_type,
   COALESCE(
-    DATE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_xpay ,1,25)), 'Asia/Manila'), 
-    DATE(TIMESTAMP_MICROS(CAST(p.created_date AS INT)), 'Asia/Manila')) as registration_date,
+    DATE(TIMESTAMP_MICROS(CAST(p.created_date AS INT)), 'Asia/Manila'),
+    DATE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_xpay ,1,25)), 'Asia/Manila')
+    ) as registration_date,
   COALESCE(
-    DATETIME(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_xpay ,1,25)), 'Asia/Manila'), 
-    DATETIME(TIMESTAMP_MICROS(CAST(p.created_date AS INT)), 'Asia/Manila')) as registration_time,
+    DATETIME(TIMESTAMP_MICROS(CAST(p.created_date AS INT)), 'Asia/Manila'),
+    DATETIME(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_xpay ,1,25)), 'Asia/Manila')
+    ) as registration_time,
   'XPay' as product
 FROM 
     (

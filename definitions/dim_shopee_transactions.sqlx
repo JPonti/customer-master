@@ -1,0 +1,55 @@
+config {
+  type: "incremental",
+  uniqueKey: ["customer_guid","transaction_id","product"],
+  bigquery: {
+    partitionBy: "transaction_date",
+    updatePartitionFilter:
+        "transaction_date >= date_sub(CURRENT_DATE('Asia/Manila'), interval 1 DAY)"
+  }
+}
+
+SELECT 
+  c.customer_guid,
+  CASE WHEN o.party_id = 6 THEN 'Shopee'
+        WHEN o.party_id = 317799 THEN 'Shopee (Tiered Pricing)'
+        WHEN o.party_id = 661556 THEN 'SHP (Reverse Logistics)'
+      END as product,
+  id as transaction_id,
+  DATE(o.created_at, 'Asia/Manila') as transaction_date
+FROM `data-pipeline-241307.base_f3.consumer_orders` o
+JOIN ${ref("dim_shopee_accounts")} d ON SAFE_CAST(JSON_EXTRACT_SCALAR(o.metadata,'$.shop_id') AS INT64) = d.account_id
+JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = d.account_id AND d.product = c.product
+WHERE party_id IN (6) AND c.product IN ('Shopee')
+${when(incremental(), `AND DATE(base_loaded_at) >= CURRENT_DATE('Asia/Manila')`)}
+
+UNION DISTINCT
+
+SELECT 
+  c.customer_guid,
+  CASE WHEN o.party_id = 6 THEN 'Shopee'
+        WHEN o.party_id = 317799 THEN 'Shopee (Tiered Pricing)'
+        WHEN o.party_id = 661556 THEN 'SHP (Reverse Logistics)'
+      END as product,
+  id as transaction_id,
+  DATE(o.created_at, 'Asia/Manila') as transaction_date
+FROM `data-pipeline-241307.base_f3.consumer_orders` o
+JOIN ${ref("dim_shopee_accounts")} d ON SAFE_CAST(JSON_EXTRACT_SCALAR(o.metadata,'$.shop_id') AS INT64) = d.account_id
+JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = d.account_id AND d.product = c.product
+WHERE party_id IN (317799) AND c.product IN ('Shopee (Tiered Pricing)')
+${when(incremental(), `AND DATE(base_loaded_at) >= CURRENT_DATE('Asia/Manila')`)}
+
+UNION DISTINCT
+SELECT 
+  c.customer_guid,
+  CASE WHEN o.party_id = 6 THEN 'Shopee'
+        WHEN o.party_id = 317799 THEN 'Shopee (Tiered Pricing)'
+        WHEN o.party_id = 661556 THEN 'SHP (Reverse Logistics)'
+      END as product,
+  id as transaction_id,
+  DATE(o.created_at, 'Asia/Manila') as transaction_date
+FROM `data-pipeline-241307.base_f3.consumer_orders` o
+JOIN ${ref("dim_shopee_accounts")} d ON SAFE_CAST(JSON_EXTRACT_SCALAR(o.metadata,'$.shop_id') AS INT64) = d.account_id
+JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = d.account_id AND d.product = c.product
+WHERE party_id IN (661556) AND c.product IN ('SHP (Reverse Logistics)')
+${when(incremental(), `AND DATE(base_loaded_at) >= CURRENT_DATE('Asia/Manila')`)}
+

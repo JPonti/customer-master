@@ -4,7 +4,7 @@ config {
   bigquery: {
     partitionBy: "registration_date",
     updatePartitionFilter:
-        "registration_date >= date_sub(current_date(), interval 1 DAY)"
+        "registration_date >= date_sub(CURRENT_DATE('Asia/Manila'), interval 1 DAY)"
   }
 }
 
