@@ -8,6 +8,47 @@ config {
   }
 }
 
-SELECT * 
-from ${ref("dim_xpay_accounts_view")}
-${when(incremental(), `where registration_date >= CURRENT_DATE('Asia/Manila')`)}
+-- SELECT * 
+-- from ${ref("dim_xpay_accounts_view")}
+-- ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+with parsed as (
+SELECT
+  id,
+  COALESCE(JSON_EXTRACT_SCALAR(TRIM(JSON_EXTRACT(payload, "$.meta"), '"'), '$.signedupAt.xpay'),
+           TRIM(JSON_EXTRACT(payload, "$.delta.meta.signedupAt.xpay"), '"'),
+           TRIM(JSON_EXTRACT(payload, "$.data.meta.signedupAt.xpay"), '"'),
+           TRIM(JSON_EXTRACT(payload, "$.meta.signedupAt.xpay"), '"')
+           ) signed_up_at_xpay,
+  ROW_NUMBER() OVER(PARTITION BY id ORDER BY kafka_streamed_at desc) AS seq,
+  kafka_streamed_at
+FROM
+  `data-pipeline-241307.firebase.prod_merchants_v3`
+${when(incremental(), `WHERE DATE(kafka_streamed_at ) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+)
+,users as (
+SELECT id user_id,
+       seq,
+       last_value(signed_up_at_xpay ignore nulls) over (partition by id order by seq desc) signed_up_at_xpay,
+       last_value(kafka_streamed_at ignore nulls) over (partition by id order by seq desc) kafka_streamed_at,
+  FROM parsed
+)
+SELECT * FROM 
+(
+SELECT
+  COALESCE(p.id,CAST(NULL AS INT)) AS account_id,
+  COALESCE(f.user_id,p.uid ) as firebase_id,
+  'user' as customer_type,
+  COALESCE(
+    DATE(TIMESTAMP_MICROS(CAST(p.created_date AS INT)), 'Asia/Manila'),
+    DATE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_xpay ,1,25)), 'Asia/Manila')
+    ) as registration_date,
+  COALESCE(
+    DATETIME(TIMESTAMP_MICROS(CAST(p.created_date AS INT)), 'Asia/Manila'),
+    DATETIME(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_xpay ,1,25)), 'Asia/Manila')
+    ) as registration_time,
+  'XPay' as product
+FROM users f
+LEFT JOIN `data-pipeline-241307.prod_xpay.customer_customer` p ON f.user_id = p.uid AND _PARTITIONDATE IS NOT NULL
+WHERE signed_up_at_xpay IS NOT NULL AND seq = 1
+)
+${when(incremental(), `WHERE firebase_id NOT IN (SELECT firebase_id FROM ${self()})`)}

@@ -16,19 +16,19 @@ SELECT
   m.customer_guid as customer_guid,
   a.*
 FROM (
-  SELECT COALESCE(CAST(account_id AS STRING), '') as account_id, firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_gogo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+  SELECT COALESCE(CAST(account_id AS STRING), '') as account_id, firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_gogo_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   UNION DISTINCT
-  SELECT COALESCE(CAST(account_id AS STRING), '') as account_id, firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_xpay_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+  SELECT COALESCE(CAST(account_id AS STRING), '') as account_id, firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_xpay_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   UNION DISTINCT
-  SELECT COALESCE(CAST(account_id AS STRING), '') as account_id, firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+  SELECT COALESCE(CAST(account_id AS STRING), '') as account_id, firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   UNION DISTINCT
-  SELECT COALESCE(CAST(account_id AS STRING), '') as account_id, firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_paylink_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+  SELECT COALESCE(CAST(account_id AS STRING), '') as account_id, firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_paylink_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   ) a
 -- from ${ref("dim_customer_accounts_view")} a
 LEFT JOIN ${ref("dim_customer_master")} m ON a.firebase_id = m.firebase_id
 WHERE a.product IN ('GOGO', 'XPay', 'XPost', 'Paylink', 'GGX Biz')
   AND a.firebase_id IS NOT NULL AND COALESCE(CAST(a.account_id AS STRING),'') <> '' 
-${when(incremental(), `AND a.registration_date >= CURRENT_DATE('Asia/Manila')`)}
+${when(incremental(), `AND a.registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
 
 UNION DISTINCT 
 
@@ -36,14 +36,14 @@ SELECT
   m.customer_guid as customer_guid,
   a.*
 FROM (
-  SELECT CAST(account_id AS STRING) as account_id, COALESCE(firebase_id,'') as firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_shopee_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+  SELECT CAST(account_id AS STRING) as account_id, COALESCE(firebase_id,'') as firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_shopee_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   UNION DISTINCT
-  SELECT CAST(account_id AS STRING) as account_id, COALESCE(firebase_id,'') as firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+  SELECT CAST(account_id AS STRING) as account_id, COALESCE(firebase_id,'') as firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   UNION DISTINCT
-  SELECT CAST(account_id AS STRING) as account_id, COALESCE(firebase_id,'') as firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_cmo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+  SELECT CAST(account_id AS STRING) as account_id, COALESCE(firebase_id,'') as firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_cmo_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   ) a
 -- from ${ref("dim_customer_accounts_view")} a
 LEFT JOIN ${ref("dim_customer_master")} m ON CAST(a.account_id AS STRING) = CAST(m.account_id AS STRING)
 WHERE a.product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost', 'GGX Biz', 'CMO')
   AND COALESCE(a.firebase_id,'') = '' AND a.account_id IS NOT NULL
-${when(incremental(), `AND a.registration_date >= CURRENT_DATE('Asia/Manila')`)}
+${when(incremental(), `AND a.registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}

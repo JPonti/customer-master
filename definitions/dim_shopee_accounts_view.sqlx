@@ -3,7 +3,6 @@ config {
 }
 
 SELECT
---   GENERATE_UUID() as customer_guid,
     CASE
         WHEN o.party_id IN (6,317799,661556) THEN SAFE_CAST(JSON_EXTRACT_SCALAR(metadata,'$.shop_id') AS INT64)
         ELSE o.party_id

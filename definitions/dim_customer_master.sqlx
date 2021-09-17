@@ -20,11 +20,11 @@ FROM (
     MAX(registration_time) as latest_registration_time
   FROM 
   (
-    SELECT * from ${ref("dim_shopee_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+    SELECT * from ${ref("dim_shopee_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
     UNION DISTINCT
-    SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+    SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
     UNION DISTINCT
-    SELECT * from ${ref("dim_cmo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+    SELECT * from ${ref("dim_cmo_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   )
   WHERE product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost','GGX Biz', 'CMO')
       AND firebase_id IS NULL AND account_id IS NOT NULL
@@ -40,15 +40,15 @@ FROM (
     MAX(registration_time) as latest_registration_time
   FROM 
   (
-    SELECT * from ${ref("dim_gogo_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+    SELECT * from ${ref("dim_gogo_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
     UNION DISTINCT
-    SELECT * from ${ref("dim_xpay_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+    SELECT * from ${ref("dim_xpay_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
     UNION DISTINCT
-    SELECT * from ${ref("dim_paylink_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+    SELECT * from ${ref("dim_paylink_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
     UNION DISTINCT
-    SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+    SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
     UNION DISTINCT
-    SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= CURRENT_DATE('Asia/Manila')`)}
+    SELECT * from ${ref("dim_xpost_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   )
   WHERE product IN ('GOGO', 'XPay', 'XPost', 'Paylink', 'GGX Biz', CAST(NULL AS STRING))
     AND firebase_id IS NOT NULL
@@ -56,4 +56,4 @@ FROM (
   GROUP BY 1,2
 )
 -- ${when(incremental(), `where latest_registration_time > (select max(latest_registration_time) from ${self()})`)}
-${when(incremental(), `where latest_registration_date > CURRENT_DATE('Asia/Manila')`)}
+${when(incremental(), `WHERE latest_registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}

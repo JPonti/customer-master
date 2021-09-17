@@ -9,7 +9,64 @@ config {
   }
 }
 
-SELECT * 
-from ${ref("dim_gogo_accounts_view")}
--- ${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}
-${when(incremental(), `where registration_date >= CURRENT_DATE('Asia/Manila')`)}
+-- SELECT * 
+-- from ${ref("dim_gogo_accounts_view")}
+-- -- ${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}
+-- ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+
+with parsed as (
+SELECT
+  id,
+  COALESCE(JSON_EXTRACT_SCALAR(TRIM(JSON_EXTRACT(payload, "$.meta"), '"'), '$.signedupAt.gogoxpress'),
+           TRIM(JSON_EXTRACT(payload, "$.delta.meta.signedupAt.gogoxpress"), '"'),
+           TRIM(JSON_EXTRACT(payload, "$.data.meta.signedupAt.gogoxpress"), '"'),
+           TRIM(JSON_EXTRACT(payload, "$.meta.signedupAt.gogoxpress"), '"'),
+           TRIM(JSON_EXTRACT(payload, "$.delta.meta.coachmarksDoneAt.gogoxpress.dashboard"), '"')
+           ) signed_up_at_gogoxpress,
+  ROW_NUMBER() OVER(PARTITION BY id ORDER BY kafka_streamed_at desc) AS seq,
+  kafka_streamed_at
+FROM
+  `data-pipeline-241307.firebase.prod_merchants_v3`
+  ${when(incremental(), `WHERE DATE(kafka_streamed_at ) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+)
+,users as (
+SELECT id user_id,
+       seq,
+       last_value(signed_up_at_gogoxpress ignore nulls) over (partition by id order by seq desc) signed_up_at_gogoxpress,
+       last_value(kafka_streamed_at ignore nulls) over (partition by id order by seq desc) kafka_streamed_at,
+  FROM parsed
+)
+SELECT * FROM (
+
+SELECT 
+  COALESCE(p.id, CAST(NULL AS INT)) AS account_id,
+  COALESCE(f.user_id,p.external_id ) as firebase_id,
+  'merchant' as customer_type,
+  DATE(COALESCE(p.created_at, PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25))),'Asia/Manila') as registration_date,
+  DATETIME(COALESCE(p.created_at, PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25))),'Asia/Manila') as registration_time,
+  o.name as product
+FROM users f
+LEFT JOIN `data-pipeline-241307.base_f3.core_parties` p ON p.external_id = f.user_id 
+LEFT JOIN `data-pipeline-241307.base_f3.core_relationships` r ON r.from_party_id = p.id AND r.to_party_id = 215085
+LEFT JOIN `data-pipeline-241307.base_f3.core_organizations` o ON o.party_id = r.to_party_id
+WHERE f.seq = 1 AND signed_up_at_gogoxpress IS NOT NULL 
+  
+UNION DISTINCT
+
+SELECT 
+  COALESCE(p.id, CAST(NULL AS INT)) AS account_id,
+  COALESCE(f.user_id,p.external_id ) as firebase_id,
+  'merchant' as customer_type,
+  DATE(COALESCE(p.created_at, PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25))),'Asia/Manila') as registration_date,
+  DATETIME(COALESCE(p.created_at, PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25))),'Asia/Manila') as registration_time,
+  o.name as product
+FROM `data-pipeline-241307.base_f3.core_parties` p
+JOIN  `data-pipeline-241307.base_f3.core_relationships` r ON r.from_party_id = p.id AND r.to_party_id = 215085
+LEFT JOIN users f ON p.external_id = f.user_id AND signed_up_at_gogoxpress IS NULL
+LEFT JOIN `data-pipeline-241307.base_f3.core_organizations` o ON o.party_id = r.to_party_id
+WHERE r.from_party_id IS NOT NULL
+  ${when(incremental(), `AND DATE(p.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+
+)
+${when(incremental(), `WHERE firebase_id NOT IN (SELECT firebase_id FROM ${self()})`)}
+
