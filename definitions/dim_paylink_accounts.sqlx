@@ -8,6 +8,46 @@ config {
   }
 }
 
-SELECT * 
-from ${ref("dim_paylink_accounts_view")}
-${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+-- SELECT * 
+-- from ${ref("dim_paylink_accounts_view")}
+-- ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+with parsed as (
+SELECT
+  id,
+  COALESCE(JSON_EXTRACT_SCALAR(TRIM(JSON_EXTRACT(payload, "$.meta"), '"'), '$.signedupAt.paylink'),
+           TRIM(JSON_EXTRACT(payload, "$.delta.meta.signedupAt.paylink"), '"'),
+           TRIM(JSON_EXTRACT(payload, "$.data.meta.signedupAt.paylink"), '"'),
+           TRIM(JSON_EXTRACT(payload, "$.meta.signedupAt.paylink"), '"')
+           ) signed_up_at_paylink,
+  ROW_NUMBER() OVER(PARTITION BY id ORDER BY kafka_streamed_at desc) AS seq,
+  kafka_streamed_at
+FROM
+  `data-pipeline-241307.firebase.prod_merchants_v3`
+${when(incremental(), `WHERE DATE(kafka_streamed_at ) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+)
+,users as (
+SELECT id user_id,
+       seq,
+       last_value(signed_up_at_paylink ignore nulls) over (partition by id order by seq desc) signed_up_at_paylink,
+       last_value(kafka_streamed_at ignore nulls) over (partition by id order by seq desc) kafka_streamed_at,
+  FROM parsed
+)
+
+SELECT
+  COALESCE(pl.id,CAST(NULL AS INT)) AS account_id,
+  COALESCE(f.user_id,p.external_id ) as firebase_id,
+  'merchant' as customer_type,
+  DATE(COALESCE(
+    PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_paylink ,1,25)), 
+    p.created_at), 'Asia/Manila') as registration_date,
+  DATETIME(COALESCE(
+    PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_paylink ,1,25)), 
+    p.created_at), 'Asia/Manila') as registration_time,
+  'Paylink' as product
+FROM users f
+LEFT JOIN `data-pipeline-241307.base_paylink.public_paylinks` pl ON pl.obo = f.user_id
+LEFT JOIN `data-pipeline-241307.base_f3.core_parties` p ON p.external_id = f.user_id
+LEFT JOIN `data-pipeline-241307.base_f3.core_relationships` r ON r.from_party_id = p.id AND r.to_party_id = 104750
+LEFT JOIN `data-pipeline-241307.base_f3.core_organizations` o ON o.party_id = r.to_party_id
+WHERE signed_up_at_paylink IS NOT NULL AND seq = 1
+${when(incremental(), `AND f.user_id NOT IN (SELECT firebase_id FROM ${self()})`)}
