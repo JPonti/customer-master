@@ -1,6 +1,0 @@
-config {
-  type: "incremental"
-}
-
-SELECT * FROM `data-pipeline-241307.dataform.dim_cmo_accounts`
-${when(incremental(), `where registration_date >= current_date()`)}

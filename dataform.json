@@ -1,6 +1,6 @@
 {
     "warehouse": "bigquery",
-    "defaultSchema": "dataform",
+    "defaultSchema": "customer",
     "assertionSchema": "dataform_assertions",
-    "defaultDatabase": "data-pipeline-241307"
+    "defaultDatabase": "data-master-staging"
 }

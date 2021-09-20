@@ -1,0 +1,26 @@
+config {
+  type: "assertion",
+  description:"check if there is duplicate firebase_id or account_id on customer_master"
+}
+
+SELECT
+  *
+FROM (
+  SELECT
+    firebase_id as account,
+    COUNT(1) AS index_row_count
+  FROM ${ref("dim_customer_master")}
+  WHERE firebase_id IS NOT NULL AND account_id IS NULL
+  GROUP BY firebase_id
+  
+  UNION DISTINCT 
+  SELECT
+    CAST(account_id AS STRING) as account,
+    COUNT(1) AS index_row_count
+  FROM ${ref("dim_customer_master")}
+  WHERE account_id IS NOT NULL AND firebase_id IS NULL
+  GROUP BY account_id
+
+  
+  ) AS data
+WHERE index_row_count > 1

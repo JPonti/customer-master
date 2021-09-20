@@ -1,0 +1,6 @@
+config {
+  type: "declaration",
+  database: "data-pipeline-241307",
+  schema: "prod_xpay",
+  name: "customer_customer"
+}

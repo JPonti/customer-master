@@ -19,10 +19,13 @@ SELECT
            TRIM(JSON_EXTRACT(payload, "$.data.meta.signedupAt.xpay"), '"'),
            TRIM(JSON_EXTRACT(payload, "$.meta.signedupAt.xpay"), '"')
            ) signed_up_at_xpay,
+  COALESCE(TRIM(JSON_EXTRACT(payload, "$.delta.email"), '"'),
+           TRIM(JSON_EXTRACT(payload, "$.data.email"), '"'),
+           TRIM(JSON_EXTRACT(payload, "$.email"), '"')
+           ) email,
   ROW_NUMBER() OVER(PARTITION BY id ORDER BY kafka_streamed_at desc) AS seq,
   kafka_streamed_at
-FROM
-  `data-pipeline-241307.firebase.prod_merchants_v3`
+FROM ${ref("prod_merchants_v3")}
 ${when(incremental(), `WHERE DATE(kafka_streamed_at ) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
 )
 ,users as (
@@ -30,6 +33,7 @@ SELECT id user_id,
        seq,
        last_value(signed_up_at_xpay ignore nulls) over (partition by id order by seq desc) signed_up_at_xpay,
        last_value(kafka_streamed_at ignore nulls) over (partition by id order by seq desc) kafka_streamed_at,
+       last_value(email ignore nulls) over (partition by id order by seq desc) email
   FROM parsed
 )
 SELECT * FROM 
@@ -48,7 +52,8 @@ SELECT
     ) as registration_time,
   'XPay' as product
 FROM users f
-LEFT JOIN `data-pipeline-241307.prod_xpay.customer_customer` p ON f.user_id = p.uid AND _PARTITIONDATE IS NOT NULL
-WHERE signed_up_at_xpay IS NOT NULL AND seq = 1
+LEFT JOIN ${ref("customer_customer")} p ON f.user_id = p.uid AND _PARTITIONDATE IS NOT NULL
+LEFT JOIN ${ref("t_test_accounts")} s on s.email = f.email AND s.product = 'XPay'
+WHERE signed_up_at_xpay IS NOT NULL AND seq = 1 AND s.email IS NULL
 )
 ${when(incremental(), `WHERE firebase_id NOT IN (SELECT firebase_id FROM ${self()})`)}

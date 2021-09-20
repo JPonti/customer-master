@@ -1,0 +1,6 @@
+config {
+  type: "declaration",
+  database: "data-pipeline-241307",
+  schema: "firebase",
+  name: "prod_merchants_v3",
+}

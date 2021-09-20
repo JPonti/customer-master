@@ -1,0 +1,7 @@
+config {
+  type: "declaration",
+  database: "data-pipeline-241307",
+  schema: "base_f3",
+  name: "consumer_orders",
+  description: "base f3 orders table"
+}

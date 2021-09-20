@@ -14,7 +14,7 @@ SELECT
       END as product,
   id as transaction_id,
   DATE(o.created_at, 'Asia/Manila') as transaction_date
-FROM `data-pipeline-241307.base_f3.consumer_orders` o
+FROM ${ref("consumer_orders")} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = COALESCE(SAFE_CAST(JSON_EXTRACT_SCALAR(o.metadata,'$.shop_id') AS INT64), 0)
 WHERE party_id IN (6) AND c.product IN ('Shopee') 
 ${when(incremental(), ` AND o.id NOT IN (SELECT transaction_id FROM ${self()} WHERE product = 'Shopee')
@@ -30,7 +30,7 @@ SELECT
       END as product,
   id as transaction_id,
   DATE(o.created_at, 'Asia/Manila') as transaction_date
-FROM `data-pipeline-241307.base_f3.consumer_orders` o
+FROM ${ref("consumer_orders")} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = COALESCE(SAFE_CAST(JSON_EXTRACT_SCALAR(o.metadata,'$.shop_id') AS INT64), 0)
 WHERE party_id IN (317799) AND c.product IN ('Shopee (Tiered Pricing)')
 ${when(incremental(), ` AND o.id NOT IN (SELECT transaction_id FROM ${self()} WHERE product = 'Shopee (Tiered Pricing)')
@@ -45,7 +45,7 @@ SELECT
       END as product,
   id as transaction_id,
   DATE(o.created_at, 'Asia/Manila') as transaction_date
-FROM `data-pipeline-241307.base_f3.consumer_orders` o
+FROM ${ref("consumer_orders")} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = COALESCE(SAFE_CAST(JSON_EXTRACT_SCALAR(o.metadata,'$.shop_id') AS INT64), 0)
 WHERE party_id IN (661556) AND c.product IN ('SHP (Reverse Logistics)')
 ${when(incremental(), ` AND o.id NOT IN (SELECT transaction_id FROM ${self()} WHERE product = 'SHP (Reverse Logistics)')

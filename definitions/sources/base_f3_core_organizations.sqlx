@@ -1,0 +1,7 @@
+config {
+  type: "declaration",
+  database: "data-pipeline-241307",
+  schema: "base_f3",
+  name: "core_organizations",
+  description: "base f3 organizations table"
+}
