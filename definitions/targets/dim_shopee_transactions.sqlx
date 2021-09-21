@@ -13,7 +13,10 @@ SELECT
         WHEN o.party_id = 661556 THEN 'SHP (Reverse Logistics)'
       END as product,
   id as transaction_id,
-  DATE(o.created_at, 'Asia/Manila') as transaction_date
+  DATE(o.created_at, 'Asia/Manila') as transaction_date,
+  o.pickup_address_id,
+  o.delivery_address_id,
+  o.return_address_id
 FROM ${ref("consumer_orders")} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = COALESCE(SAFE_CAST(JSON_EXTRACT_SCALAR(o.metadata,'$.shop_id') AS INT64), 0)
 WHERE party_id IN (6) AND c.product IN ('Shopee') 
@@ -29,7 +32,10 @@ SELECT
         WHEN o.party_id = 661556 THEN 'SHP (Reverse Logistics)'
       END as product,
   id as transaction_id,
-  DATE(o.created_at, 'Asia/Manila') as transaction_date
+  DATE(o.created_at, 'Asia/Manila') as transaction_date,
+  o.pickup_address_id,
+  o.delivery_address_id,
+  o.return_address_id
 FROM ${ref("consumer_orders")} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = COALESCE(SAFE_CAST(JSON_EXTRACT_SCALAR(o.metadata,'$.shop_id') AS INT64), 0)
 WHERE party_id IN (317799) AND c.product IN ('Shopee (Tiered Pricing)')
@@ -44,7 +50,10 @@ SELECT
         WHEN o.party_id = 661556 THEN 'SHP (Reverse Logistics)'
       END as product,
   id as transaction_id,
-  DATE(o.created_at, 'Asia/Manila') as transaction_date
+  DATE(o.created_at, 'Asia/Manila') as transaction_date,
+  o.pickup_address_id,
+  o.delivery_address_id,
+  o.return_address_id
 FROM ${ref("consumer_orders")} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = COALESCE(SAFE_CAST(JSON_EXTRACT_SCALAR(o.metadata,'$.shop_id') AS INT64), 0)
 WHERE party_id IN (661556) AND c.product IN ('SHP (Reverse Logistics)')

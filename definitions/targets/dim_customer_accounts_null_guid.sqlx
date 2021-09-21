@@ -1,0 +1,8 @@
+config {
+  type: "assertion"
+}
+
+SELECT
+  *
+FROM ${ref("dim_customer_accounts")}
+WHERE customer_guid IS NULL

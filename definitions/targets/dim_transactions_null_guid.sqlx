@@ -1,0 +1,25 @@
+config {
+  type: "assertion"
+}
+
+SELECT 
+* 
+FROM 
+(
+  SELECT
+    *
+  FROM ${ref("dim_gogo_transactions")}
+  UNION DISTINCT
+  SELECT
+    *
+  FROM ${ref("dim_shopee_transactions")}
+  UNION DISTINCT
+  SELECT
+    *
+  FROM ${ref("dim_xpost_transactions")}
+  UNION DISTINCT
+  SELECT
+    *
+  FROM ${ref("dim_cmo_transactions")}
+)
+WHERE customer_guid IS NULL

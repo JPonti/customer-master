@@ -10,7 +10,10 @@ SELECT
   c.customer_guid,
   c.product,
   id as transaction_id,
-  DATE(o.created_at, 'Asia/Manila') as transaction_date
+  DATE(o.created_at, 'Asia/Manila') as transaction_date,
+  o.pickup_address_id,
+  o.delivery_address_id,
+  o.return_address_id
 FROM ${ref("consumer_orders")} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = o.party_id
 WHERE service_id NOT IN (215085, 8) AND c.product IN ('XPost', 'GGX Biz')

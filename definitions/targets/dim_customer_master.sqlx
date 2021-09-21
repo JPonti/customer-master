@@ -1,5 +1,11 @@
 config {
-  type: "incremental"
+  type: "incremental",
+  uniqueKey: ["firebase_id","account_id"],
+  bigquery: {
+    partitionBy: "registration_date",
+    updatePartitionFilter:
+        "registration_date >= date_sub(CURRENT_DATE('Asia/Manila'), interval 1 DAY)"
+  }
 }
 
 /* creates new customer_guid when there is new registration*/

@@ -16,6 +16,6 @@ SELECT
   o.return_address_id
 FROM ${ref("consumer_orders")} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = o.party_id
-WHERE service_id IN (215085) AND c.product IN ('GOGO')
-${when(incremental(), ` AND o.id NOT IN (SELECT transaction_id FROM ${self()} WHERE product = 'GOGO')
+WHERE service_id IN (8) AND c.product IN ('CMO')
+${when(incremental(), ` AND o.id NOT IN (SELECT transaction_id FROM ${self()})
   AND DATE(base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}

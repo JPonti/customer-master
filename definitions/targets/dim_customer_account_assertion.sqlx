@@ -8,6 +8,6 @@ SELECT
   account_id,
   COUNT(*) as index_row_count
 FROM ${ref("dim_customer_accounts")}
-WHERE firebase_id IS NOT NULL AND account_id IS NULL
+-- WHERE firebase_id IS NOT NULL AND account_id IS NULL
 GROUP BY 1,2,3
 HAVING COUNT(*) > 1
