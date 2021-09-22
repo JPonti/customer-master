@@ -1,0 +1,33 @@
+config {
+  type: "incremental",
+  uniqueKey: ["customer_guid","product","address_id"],
+  bigquery: {
+    partitionBy: "date",
+    updatePartitionFilter:
+        "date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)"
+  }
+}
+SELECT 
+  DISTINCT
+  DATE(a1.created_at) as date,
+  a.account_id,
+  a.customer_guid,
+  t.product,
+  a1.id as address_id,
+  a1.name,
+  a1.email,
+  a1.phone_number,
+  a1.mobile_number,
+  a1.line_1,
+  a1.district,
+  a1.city,
+  a1.state,
+  a1.region
+FROM ${ref("dim_gogo_transactions")} t
+JOIN ${ref("dim_customer_accounts")} a ON a.customer_guid = t.customer_guid  AND a.product IN ('GOGO')
+JOIN ${ref("consumer_orders")}  o ON t.transaction_id = o.id  
+JOIN ${ref("core_addresses")} a1 ON o.pickup_address_id = a1.id
+WHERE a1.type = 'pickup' AND o.service_id  IN (215085)  AND a1.name <> 'Shopee Warehouse'
+  ${when(incremental(), `AND DATE(transaction_date) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)
+  AND DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)`)}
+  --  AND DATE(a1.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)`

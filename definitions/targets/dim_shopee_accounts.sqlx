@@ -2,17 +2,9 @@ config {
   type: "incremental",
   uniqueKey: ["account_id","product"],
   bigquery: {
-    partitionBy: "registration_date",
-    updatePartitionFilter:
-        "registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)"
+    partitionBy: "registration_date"
   }
 }
-
--- SELECT * 
--- from ${ref("dim_shopee_accounts_view")}
--- -- ${when(incremental(), `where registration_date > (select max(registration_date) from ${self()})`)}
--- WHERE account_id IS NOT NULL
--- ${when(incremental(), `AND  registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
 
 SELECT
     CASE

@@ -1,5 +1,6 @@
 config {
-  type: "assertion"
+  type: "assertion",
+  description:"check if there is account with no guid on customer_accounts"
 }
 
 SELECT

@@ -1,0 +1,12 @@
+config {
+  type: "assertion"
+}
+
+SELECT
+  product, 
+  firebase_id,
+  account_id,
+  COUNT(*) as index_row_count
+FROM ${ref("dim_xpay_accounts")}
+GROUP BY 1,2,3
+HAVING COUNT(*) > 1

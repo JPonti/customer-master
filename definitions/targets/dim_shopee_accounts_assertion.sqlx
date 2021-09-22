@@ -1,0 +1,11 @@
+config {
+  type: "assertion"
+}
+
+SELECT
+  product, 
+  account_id,
+  COUNT(*) as index_row_count
+FROM ${ref("dim_shopee_accounts")}
+GROUP BY 1,2
+HAVING COUNT(*) > 1

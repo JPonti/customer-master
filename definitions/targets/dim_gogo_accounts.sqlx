@@ -2,12 +2,12 @@ config {
   type: "incremental",
   uniqueKey: ["firebase_id"],
   bigquery: {
-    partitionBy: "registration_date",
-    updatePartitionFilter:
-        "registration_date >= date_sub(CURRENT_DATE('Asia/Manila'), interval 1 DAY)"
-
+    partitionBy: "registration_date"
   }
 }
+
+    -- updatePartitionFilter:
+    --     "registration_date >= date_sub(CURRENT_DATE('Asia/Manila'), interval 1 DAY)"
 
 with parsed as (
 SELECT
@@ -35,7 +35,7 @@ SELECT id user_id,
        last_value(email ignore nulls) over (partition by id order by seq desc) email
   FROM parsed
 )
-SELECT * FROM (
+SELECT DISTINCT * FROM (
 
 SELECT 
   COALESCE(p.id, CAST(NULL AS INT)) AS account_id,
