@@ -28,8 +28,10 @@ FROM (
     SELECT * from ${ref("dim_cmo_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
     UNION DISTINCT
     SELECT * from ${ref("dim_lbconline_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+    UNION DISTINCT
+    SELECT * from ${ref("dim_lazada_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   )
-  WHERE product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost','GGX Biz', 'CMO', 'LBC Online (Account 1)','LBC Online (Account 2)')
+  WHERE product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost','GGX Biz', 'CMO', 'LBC Online (Account 1)','LBC Online (Account 2)','Lazada')
       AND firebase_id IS NULL AND account_id IS NOT NULL
       ${when(incremental(), `AND account_id NOT IN (SELECT account_id FROM ${self()} WHERE account_id IS NOT NULL)`)}
   GROUP BY 1
