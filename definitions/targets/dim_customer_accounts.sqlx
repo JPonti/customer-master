@@ -1,10 +1,11 @@
 config {
   type: "incremental",
+  tags:["shopee"],
   uniqueKey: ["firebase_id","account_id","product"],
   bigquery: {
     partitionBy: "registration_date",
     updatePartitionFilter:
-        "registration_date >= date_sub(CURRENT_DATE('Asia/Manila'), interval 1 DAY)"
+        "registration_date >= date_sub(CURRENT_DATE('Asia/Manila'), interval 6 MONTH)"
   }
 }
 /*NOTES: 

@@ -1,5 +1,6 @@
 config {
   type: "assertion",
+  tags:["shopee"],
   description:"check if there is duplicate firebase_id or account_id on customer_master"
 }
 

@@ -1,5 +1,6 @@
 config {
-  type: "incremental"
+  type: "incremental",
+  tags:["shopee"]
 }
 
 /* creates new customer_guid when there is new registration*/

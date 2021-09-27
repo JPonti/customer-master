@@ -41,8 +41,8 @@ SELECT
   COALESCE(p.id, CAST(NULL AS INT)) AS account_id,
   COALESCE(f.user_id,p.external_id ) as firebase_id,
   'merchant' as customer_type,
-  DATE(COALESCE(p.created_at, PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25))),'Asia/Manila') as registration_date,
-  DATETIME(COALESCE(p.created_at, PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25))),'Asia/Manila') as registration_time,
+  DATE(COALESCE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)),p.created_at),'Asia/Manila') as registration_date,
+  DATETIME(COALESCE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)),p.created_at),'Asia/Manila') as registration_time,
   'GOGO' as product  --hardcoded because of signed_up_at_gogoxpress filter NOT NULL
 FROM users f
 LEFT JOIN ${ref("core_parties")} p ON p.external_id = f.user_id 
@@ -57,8 +57,8 @@ SELECT
   COALESCE(p.id, CAST(NULL AS INT)) AS account_id,
   COALESCE(f.user_id,p.external_id ) as firebase_id,
   'merchant' as customer_type,
-  DATE(COALESCE(p.created_at, PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25))),'Asia/Manila') as registration_date,
-  DATETIME(COALESCE(p.created_at, PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25))),'Asia/Manila') as registration_time,
+  DATE(COALESCE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)),p.created_at),'Asia/Manila') as registration_date,
+  DATETIME(COALESCE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)),p.created_at),'Asia/Manila') as registration_time,
   o.name as product,
 FROM ${ref("core_parties")} p
 JOIN  ${ref("core_relationships")} r ON r.from_party_id = p.id AND r.to_party_id = 215085

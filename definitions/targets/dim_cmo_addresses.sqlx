@@ -21,7 +21,7 @@ SELECT
   a1.line_1,
   a1.district,
   a1.city,
-  a1.state,
+  a1.state as province,
   a1.region
 FROM ${ref("dim_cmo_transactions")} t
 JOIN ${ref("dim_customer_accounts")} a ON a.customer_guid = t.customer_guid  AND a.product IN ('CMO')
