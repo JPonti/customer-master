@@ -1,0 +1,22 @@
+config {
+  type: "incremental",
+  uniqueKey: ["account_id","product"],
+  bigquery: {
+    partitionBy: "registration_date"
+  }
+}
+
+SELECT
+  pickup_address_id as account_id,
+  CAST(NULL AS STRING) as firebase_id,
+  'merchant' as customer_type,
+  MIN(DATE(o.created_at, 'Asia/Manila')) as registration_date,  
+  MIN(DATETIME(o.created_at, 'Asia/Manila')) as registration_time,  
+  org.name as product
+FROM ${ref("consumer_orders")} o
+JOIN ${ref("core_organizations")} org ON org.party_id = o.service_id
+WHERE service_id IN (323063,323064)
+${when(incremental(), `AND  DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)
+  AND o.pickup_address_id NOT IN (SELECT account_id FROM ${self()} WHERE product IN ('LBC Online (Account 1)','LBC Online (Account 2)' ))`)}
+GROUP BY 1,2,3,6
+

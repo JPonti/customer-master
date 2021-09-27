@@ -21,5 +21,9 @@ FROM
   SELECT
     *
   FROM ${ref("dim_cmo_transactions")}
+  UNION DISTINCT
+  SELECT
+    *
+  FROM ${ref("dim_lbconline_transactions")}
 )
 WHERE customer_guid IS NULL
