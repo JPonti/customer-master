@@ -1,5 +1,6 @@
 config {
   type: "incremental",
+  tags:["active"],
   uniqueKey: ["account_id","product"],
   bigquery: {
     partitionBy: "registration_date"

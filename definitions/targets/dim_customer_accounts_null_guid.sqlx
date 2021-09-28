@@ -1,6 +1,6 @@
 config {
   type: "assertion",
-  tags:["shopee"],
+  tags:["Shopee","active"],
   description:"check if there is account with no guid on customer_accounts"
 }
 

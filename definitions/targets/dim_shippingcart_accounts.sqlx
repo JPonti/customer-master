@@ -1,6 +1,6 @@
 config {
   type: "incremental",
-  tags:["ShippingCart"],
+  tags:["ShippingCart","active"],
   uniqueKey: ["account_id","product"],
   bigquery: {
     partitionBy: "registration_date"

@@ -1,5 +1,6 @@
 config {
   type: "incremental",
+  tags:["active"],
   uniqueKey: ["customer_guid","product","address_id"],
   bigquery: {
     partitionBy: "date",
