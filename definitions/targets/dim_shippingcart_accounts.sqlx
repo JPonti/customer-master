@@ -1,0 +1,38 @@
+config {
+  type: "incremental",
+  tags:["ShippingCart"],
+  uniqueKey: ["account_id","product"],
+  bigquery: {
+    partitionBy: "registration_date"
+  }
+}
+
+SELECT 
+  p.id AS account_id,
+  CAST(NULL AS STRING) as firebase_id,
+  'buyer' as customer_type,
+  COALESCE(CASE WHEN u.phone_number LIKE '+63%' THEN 'PH'
+             WHEN u.phone_number LIKE '+60%' THEN 'MY'
+             ELSE IF(DATE(p.created_at,'Asia/Manila') < '2019-03-26' /*PH Only Era*/, 'PH',NULL) END, a.country_code) AS country,
+  DATE(p.created_at,'Asia/Manila') AS registration_date,
+  DATETIME(p.created_at,'Asia/Manila') AS registration_time,
+  'ShippingCart' as product
+FROM ${ref({schema: "base_shippingcart", name: "core_parties"})} p
+  JOIN ${ref({schema: "base_shippingcart", name: "core_users"})} u on u.party_id = p.id
+  JOIN ${ref({schema: "base_shippingcart", name: "core_party_roles"})} r on r.party_id = p.id and r.role_id = 1
+  LEFT JOIN ${ref({schema: "base_shippingcart", name: "core_addresses"})} a on a.id = u.address_id
+  LEFT JOIN ${ref("t_test_accounts")} t ON t.email = u.email AND product = 'ShippingCart'
+WHERE p.type = 'user'
+  AND t.email IS NULL
+  AND p.id NOT IN (
+  130604, --Not In System Account
+  29761, --Recovery Account
+  30290, -- Disposal Account
+  97602, --Pull-out Account
+  136036, --Murph Memije test account
+  10600, --etan test account
+  173796, --sc uat acct
+  1743) --Test Koko Domingo
+  ${when(incremental(), `AND DATE(p.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+
+

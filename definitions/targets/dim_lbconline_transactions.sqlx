@@ -16,7 +16,7 @@ SELECT
   o.pickup_address_id,
   o.delivery_address_id,
   o.return_address_id
-FROM ${resolve({schema: "base_f3", name: "consumer_orders"})} o
+FROM ${ref({schema: "base_f3", name: "consumer_orders"})} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = o.pickup_address_id
 WHERE service_id IN (323063,323064) AND c.product IN ('LBC Online (Account 1)', 'LBC Online (Account 2)') 
 ${when(incremental(), ` AND o.id NOT IN (SELECT transaction_id FROM ${self()})

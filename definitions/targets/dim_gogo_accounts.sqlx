@@ -60,10 +60,10 @@ SELECT
   DATE(COALESCE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)),p.created_at),'Asia/Manila') as registration_date,
   DATETIME(COALESCE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)),p.created_at),'Asia/Manila') as registration_time,
   o.name as product,
-FROM ${resolve({schema: "base_f3", name: "core_parties"})} p
-JOIN ${resolve({schema: "base_f3", name: "core_relationships"})} r ON r.from_party_id = p.id AND r.to_party_id = 215085
+FROM ${ref({schema: "base_f3", name: "core_parties"})} p
+JOIN ${ref({schema: "base_f3", name: "core_relationships"})} r ON r.from_party_id = p.id AND r.to_party_id = 215085
 LEFT JOIN users f ON p.external_id = f.user_id AND seq = 1 --AND signed_up_at_gogoxpress IS NULL
-LEFT JOIN ${resolve({schema: "base_f3", name: "core_organizations"})} o ON o.party_id = r.to_party_id
+LEFT JOIN ${ref({schema: "base_f3", name: "core_organizations"})} o ON o.party_id = r.to_party_id
 LEFT JOIN ${ref("t_test_accounts")} t ON t.email = f.email AND product = 'Gogo'
 WHERE r.from_party_id IS NOT NULL AND t.email IS NULL
   ${when(incremental(), `AND DATE(p.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}

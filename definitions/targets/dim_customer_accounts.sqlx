@@ -46,9 +46,11 @@ FROM (
   SELECT CAST(account_id AS STRING) as account_id, COALESCE(firebase_id,'') as firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_lbconline_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   UNION DISTINCT
   SELECT CAST(account_id AS STRING) as account_id, COALESCE(firebase_id,'') as firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_lazada_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+  UNION DISTINCT
+  SELECT CAST(account_id AS STRING) as account_id, COALESCE(firebase_id,'') as firebase_id, customer_type,registration_date, registration_time, product from ${ref("dim_shippingcart_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
   ) a
 -- from ${ref("dim_customer_accounts_view")} a
 JOIN ${ref("dim_customer_master")} m ON CAST(a.account_id AS STRING) = CAST(m.account_id AS STRING)
-WHERE a.product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost', 'GGX Biz', 'CMO','LBC Online (Account 1)','LBC Online (Account 2)','Lazada')
+WHERE a.product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost', 'GGX Biz', 'CMO','LBC Online (Account 1)','LBC Online (Account 2)','Lazada','ShippingCart')
   AND COALESCE(a.firebase_id,'') = '' AND a.account_id IS NOT NULL
 ${when(incremental(), `AND a.registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}

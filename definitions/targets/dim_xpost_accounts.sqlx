@@ -61,11 +61,11 @@ SELECT
   DATE(p.created_at, 'Asia/Manila') as registration_date,
   DATETIME(p.created_at,'Asia/Manila') as registration_time,
   CASE WHEN DATE(p.created_at,'Asia/Manila') >= '2021-03-22' THEN 'GGX Biz' ELSE 'XPost' END as product
-FROM ${resolve({schema: "base_f3", name: "core_parties"})} p
-JOIN ${resolve({schema: "base_f3", name: "core_organizations"})} o ON o.party_id = p.id
-JOIN ${resolve({schema: "base_f3", name: "core_party_roles"})} pr ON pr.party_id = p.id 
-LEFT JOIN ${resolve({schema: "base_f3", name: "core_relationships"})} rf ON rf.from_party_id = p.id AND rf.type = 'merchant_of'
-LEFT JOIN ${resolve({schema: "base_f3", name: "core_relationships"})} rt ON rt.to_party_id = p.id AND rt.type = 'merchant_of'
+FROM ${ref({schema: "base_f3", name: "core_parties"})} p
+JOIN ${ref({schema: "base_f3", name: "core_organizations"})} o ON o.party_id = p.id
+JOIN ${ref({schema: "base_f3", name: "core_party_roles"})} pr ON pr.party_id = p.id 
+LEFT JOIN ${ref({schema: "base_f3", name: "core_relationships"})} rf ON rf.from_party_id = p.id AND rf.type = 'merchant_of'
+LEFT JOIN ${ref({schema: "base_f3", name: "core_relationships"})} rt ON rt.to_party_id = p.id AND rt.type = 'merchant_of'
 WHERE rf.id IS NULL
   AND rt.id IS NULL
   AND p.id NOT IN (6,7,8,9,19,70189,70190,70191,87654,215744,317799,323063,323064,661556,683375)

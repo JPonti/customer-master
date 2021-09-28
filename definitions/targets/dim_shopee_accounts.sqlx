@@ -20,9 +20,9 @@ SELECT
     MIN(DATETIME(o.created_at, 'Asia/Manila')) as registration_time,  
     org.name as product
 -- FROM `data-pipeline-241307.base_f3.consumer_orders` o
-FROM ${resolve({schema: "base_f3", name: "consumer_orders"})} o
+FROM ${ref({schema: "base_f3", name: "consumer_orders"})} o
 -- JOIN `data-pipeline-241307.base_f3.core_organizations` org ON org.party_id = o.service_id
-JOIN ${resolve({schema: "base_f3", name: "core_organizations"})} org ON org.party_id = o.service_id
+JOIN ${ref({schema: "base_f3", name: "core_organizations"})} org ON org.party_id = o.service_id
 WHERE o.party_id IN (6,317799,661556)
 ${when(incremental(), `AND  DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)
   AND org.name NOT IN (SELECT product FROM ${self()} WHERE account_id = SAFE_CAST(JSON_EXTRACT_SCALAR(metadata,'$.shop_id') AS INT64))`)}
