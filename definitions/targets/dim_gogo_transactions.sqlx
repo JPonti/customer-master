@@ -14,7 +14,7 @@ SELECT
   o.pickup_address_id,
   o.delivery_address_id,
   o.return_address_id
-FROM ${ref("consumer_orders")} o
+FROM ${resolve({schema: "base_f3", name: "consumer_orders"})} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = o.party_id
 WHERE service_id IN (215085) AND c.product IN ('GOGO')
 ${when(incremental(), ` AND o.id NOT IN (SELECT transaction_id FROM ${self()} WHERE product = 'GOGO')

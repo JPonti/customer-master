@@ -13,8 +13,8 @@ SELECT
   MIN(DATE(o.created_at, 'Asia/Manila')) as registration_date,  
   MIN(DATETIME(o.created_at, 'Asia/Manila')) as registration_time,  
   org.name as product
-FROM ${ref("consumer_orders")} o
-JOIN ${ref("core_organizations")} org ON org.party_id = o.service_id
+FROM ${resolve({schema: "base_f3", name: "consumer_orders"})} o
+JOIN ${resolve({schema: "base_f3", name: "core_organizations"})} org ON org.party_id = o.service_id
 WHERE service_id IN (323063,323064)
 ${when(incremental(), `AND  DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)
   AND o.pickup_address_id NOT IN (SELECT account_id FROM ${self()})`)}

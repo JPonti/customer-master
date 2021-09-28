@@ -25,8 +25,8 @@ SELECT
   a1.region
 FROM ${ref("dim_xpost_transactions")} t
 JOIN ${ref("dim_customer_accounts")} a ON a.customer_guid = t.customer_guid  AND a.product IN ('XPost', 'GGX Biz')
-JOIN ${ref("consumer_orders")}  o ON t.transaction_id = o.id  
-JOIN ${ref("core_addresses")} a1 ON o.pickup_address_id = a1.id
+JOIN ${resolve({schema: "base_f3", name: "consumer_orders"})} o ON t.transaction_id = o.id  
+JOIN ${resolve({schema: "base_f3", name: "core_addresses"})} a1 ON o.pickup_address_id = a1.id
 WHERE a1.type = 'pickup' AND o.service_id  NOT IN (215085, 8)
   ${when(incremental(), `AND DATE(transaction_date) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)
   AND DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)`)}

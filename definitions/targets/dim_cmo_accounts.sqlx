@@ -12,7 +12,7 @@ SELECT
 FROM `data-insights-176500.base_cmo.core_parties` p
 JOIN (SELECT DISTINCT party_id FROM `data-insights-176500.base_cmo.core_party_roles` WHERE role_id = 2) pr ON pr.party_id = p.id --merchant
 JOIN `data-insights-176500.base_cmo.core_users` u ON u.party_id = p.id
-LEFT JOIN  ${ref("core_parties")} f on f.external_id = p.uuid
+LEFT JOIN  ${resolve({schema: "base_f3", name: "core_parties"})} f on f.external_id = p.uuid
  WHERE u.email NOT LIKE 'test+%'
   AND u.email NOT IN (SELECT email FROM ${ref("t_test_accounts")} WHERE product = 'CMO')
  ${when(incremental(), `AND DATE(p.created_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}

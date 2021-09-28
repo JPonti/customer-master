@@ -1,0 +1,7 @@
+config {
+  type: "declaration",
+  database: "data-pipeline-241307",
+  schema: "base_shippingcart",
+  name: "core_parties",
+  description: "base base_shippingcart core_parties"
+}

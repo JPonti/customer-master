@@ -50,9 +50,9 @@ SELECT
   'Paylink' as product
 FROM users f
 LEFT JOIN ${ref("public_paylinks")}pl ON pl.obo = f.user_id
-LEFT JOIN ${ref("core_parties")} p ON p.external_id = f.user_id
-LEFT JOIN ${ref("core_relationships")} r ON r.from_party_id = p.id AND r.to_party_id = 104750
-LEFT JOIN ${ref("core_organizations")} o ON o.party_id = r.to_party_id
+LEFT JOIN ${resolve({schema: "base_f3", name: "core_parties"})} p ON p.external_id = f.user_id
+LEFT JOIN ${resolve({schema: "base_f3", name: "core_relationships"})} r ON r.from_party_id = p.id AND r.to_party_id = 104750
+LEFT JOIN ${resolve({schema: "base_f3", name: "core_organizations"})} o ON o.party_id = r.to_party_id
 LEFT JOIN ${ref("t_test_accounts")} s on s.email = f.email AND s.product = 'Paylink'
 WHERE signed_up_at_paylink IS NOT NULL AND seq = 1 AND s.email IS NULL
 ${when(incremental(), `AND f.user_id NOT IN (SELECT firebase_id FROM ${self()})`)}
