@@ -11,9 +11,6 @@ SELECT
   p.id AS account_id,
   CAST(NULL AS STRING) as firebase_id,
   'buyer' as customer_type,
-  COALESCE(CASE WHEN u.phone_number LIKE '+63%' THEN 'PH'
-             WHEN u.phone_number LIKE '+60%' THEN 'MY'
-             ELSE IF(DATE(p.created_at,'Asia/Manila') < '2019-03-26' /*PH Only Era*/, 'PH',NULL) END, a.country_code) AS country,
   DATE(p.created_at,'Asia/Manila') AS registration_date,
   DATETIME(p.created_at,'Asia/Manila') AS registration_time,
   'ShippingCart' as product

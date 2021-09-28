@@ -34,8 +34,7 @@ JOIN ${ref({schema: "base_f3", name: "consumer_orders"})}  o ON t.transaction_id
 JOIN ${ref({schema: "base_f3", name: "core_addresses"})} a1 ON o.delivery_address_id = a1.id
 WHERE a1.type = 'delivery' AND o.party_id  = 661556  AND a1.name <> 'Shopee Warehouse'
   ${when(incremental(), `AND DATE(transaction_date) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)
-  AND DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)
-  AND DATE(a1.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)`)}
+  AND DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)`)}
 
 UNION DISTINCT 
 
@@ -61,5 +60,4 @@ JOIN ${ref({schema: "base_f3", name: "consumer_orders"})}   o ON t.transaction_i
 JOIN ${ref({schema: "base_f3", name: "core_addresses"})}  a1 ON o.pickup_address_id = a1.id
 WHERE a1.type = 'pickup' AND o.party_id  IN (6, 317799)  --AND a1.name <> 'Shopee Warehouse'
   ${when(incremental(), `AND DATE(transaction_date) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)
-  AND DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)
-  AND DATE(a1.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)`)}
+  AND DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)`)}

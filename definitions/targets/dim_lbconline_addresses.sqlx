@@ -30,5 +30,4 @@ JOIN ${ref({schema: "base_f3", name: "consumer_orders"})}  o ON t.transaction_id
 JOIN ${ref({schema: "base_f3", name: "core_addresses"})} a1 ON o.pickup_address_id = a1.id
 WHERE a1.type = 'pickup' AND o.service_id  IN (323063,323064)
   ${when(incremental(), `AND DATE(transaction_date) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)
-  AND DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)
-  AND DATE(a1.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)`)}
+  AND DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 1 DAY)`)}
