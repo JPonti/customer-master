@@ -7,6 +7,9 @@
         {
           "name": "new_schedule",
           "cron": "0 16 * * *",
+          "tags": [
+            "active"
+          ],
           "notify": [
             {
               "channel": "xa-dataform",

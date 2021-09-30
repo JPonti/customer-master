@@ -1,0 +1,6 @@
+config {
+  type: "declaration",
+  database: "data-pipeline-241307",
+  schema: "aws_dynamodb",
+  name: "ims_blacklisted_banks"
+}

@@ -1,0 +1,58 @@
+config {
+  type: "incremental",
+  tags:["Shopee","active"],
+  uniqueKey: ["customer_guid", "product", "status"],
+  bigquery: {
+    partitionBy: "date"
+  }
+}
+
+WITH 
+bank_accounts AS (
+SELECT *,
+       ROW_NUMBER() OVER (PARTITION BY party_id ORDER BY updated_at DESC) latest
+  FROM  ${ref({schema: "base_f3", name: "core_bank_accounts"})}
+ WHERE preferred = true
+),
+
+blacklisted_accounts AS (
+  SELECT *
+    FROM ${ref({schema: "aws_dynamodb", name: "ims_blacklisted_banks"})}
+    WHERE created_at IS NOT NULL
+    AND op not like 'DELETE%'
+)
+
+SELECT
+  *
+FROM (
+SELECT 
+  a.customer_guid,
+  a.product,
+  status_history.status_date as date,
+  CASE WHEN status_history.status = 0 THEN 'suspended' ELSE 'active' END as status
+FROM ${ref("dim_customer_accounts")} a
+  JOIN  ${ref({schema: "base_f3", name: "core_parties"})} p ON p.id = SAFE_CAST(a.account_id AS INT)
+  JOIN  (
+          SELECT 
+            id,
+            status,
+            MIN(DATE(airflow_loaded_at,'Asia/Manila')) as status_date,
+          FROM ${ref({schema: "airflow_f3", name: "core_parties"})}
+          GROUP BY 1,2
+        )status_history ON status_history.id = SAFE_CAST(a.account_id AS INT)
+WHERE a.product IN ('GOGO','XPost', 'GGX Biz', 'CMO')
+  ${when(incremental(), `AND DATE(p.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+
+UNION DISTINCT
+SELECT 
+  a.customer_guid,
+  a.product,
+  DATE(bl.created_at) as date,
+  CASE WHEN bl.account_number IS NOT NULL THEN 'blacklisted' ELSE NULL END AS  status,
+FROM ${ref("dim_customer_accounts")} a
+  JOIN  ${ref({schema: "base_f3", name: "core_parties"})} p ON p.id = SAFE_CAST(a.account_id AS INT)
+  JOIN bank_accounts as b ON b.party_id = SAFE_CAST(a.account_id AS INT) AND b.latest = 1
+  JOIN  blacklisted_accounts bl on bl.account_number= b.account_number
+WHERE a.product IN ('GOGO','XPost', 'GGX Biz', 'CMO')
+  ${when(incremental(), `AND DATE(p.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)} 
+)

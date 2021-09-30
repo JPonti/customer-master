@@ -1,0 +1,12 @@
+config {
+  type: "assertion",
+  tags:["active"]
+}
+
+SELECT
+  product, 
+  transaction_id,
+  COUNT(*) as index_row_count
+FROM ${ref("dim_shippingcart_transactions")}
+GROUP BY 1,2
+HAVING COUNT(*) > 1
