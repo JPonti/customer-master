@@ -1,0 +1,50 @@
+config {
+  type: "incremental",
+  tags:["active"],
+  uniqueKey: ["customer_guid","date","source"],
+  bigquery: {
+    partitionBy: "date"
+  }
+}
+SELECT DISTINCT * FROM (
+SELECT
+    'bank_accounts' as source,
+    customer_guid,
+    date,
+    account_name as name
+FROM ${ref("dim_customer_bank_accounts")}
+
+UNION DISTINCT
+
+SELECT
+    'addresses' as source,
+    customer_guid,
+    date,
+    name
+FROM (
+    SELECT * FROM ${ref("dim_gogo_addresses")}
+    UNION DISTINCT 
+    SELECT * FROM ${ref("dim_shopee_addresses")}
+    UNION DISTINCT
+    SELECT * FROM ${ref("dim_cmo_addresses")}
+    UNION DISTINCT
+    SELECT * FROM ${ref("dim_lbconline_addresses")}
+    UNION DISTINCT
+    SELECT * FROM ${ref("dim_xpost_addresses")}
+    UNION DISTINCT
+    SELECT * FROM ${ref("dim_lazada_addresses")}
+    UNION DISTINCT
+    SELECT * EXCEPT(country) FROM ${ref("dim_shippingcart_addresses")}
+)
+
+UNION DISTINCT 
+
+SELECT 
+    'firebase' as source,
+    customer_guid,
+    registration_date,
+    CONCAT(u.first_name, ' ', u.last_name) name
+FROM ${ref("dim_customer_accounts")} a
+JOIN ${ref({schema: "base_firebase", name: "users"})} u ON a.firebase_id = u.user_id
+)
+ORDER BY date DESC
