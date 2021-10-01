@@ -1,6 +1,6 @@
 config {
   type: "incremental",
-  tags:["Shopee","active"],
+  tags:["active"],
   uniqueKey: ["customer_guid", "product", "status"],
   bigquery: {
     partitionBy: "date"

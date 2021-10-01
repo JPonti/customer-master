@@ -8,19 +8,21 @@ SELECT
   *
 FROM (
   SELECT
+    product,
     firebase_id as account,
     COUNT(1) AS index_row_count
   FROM ${ref("dim_customer_master")}
   WHERE firebase_id IS NOT NULL AND account_id IS NULL
-  GROUP BY firebase_id
+  GROUP BY 1,2
   
   UNION DISTINCT 
   SELECT
+    product,
     CAST(account_id AS STRING) as account,
     COUNT(1) AS index_row_count
   FROM ${ref("dim_customer_master")}
   WHERE account_id IS NOT NULL AND firebase_id IS NULL
-  GROUP BY account_id
+  GROUP BY 1,2
 
   
   ) AS data

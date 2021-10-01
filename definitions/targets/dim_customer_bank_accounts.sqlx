@@ -1,0 +1,30 @@
+config {
+  type: "incremental",
+  tags:["active"],
+  uniqueKey: ["customer_guid", "product", "bank_name", "account_number","account_name","date" ],
+  bigquery: {
+    partitionBy: "date"
+  }
+}
+
+WITH 
+bank_accounts AS (
+SELECT *,
+       ROW_NUMBER() OVER (PARTITION BY party_id ORDER BY updated_at DESC) latest
+  FROM  `data-pipeline-241307.base_f3.core_bank_accounts`
+--  WHERE preferred = true
+ ${when(incremental(), `WHERE DATE(base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+)
+
+SELECT
+  DISTINCT
+  a.customer_guid,
+  DATE(b.created_at, 'Asia/Manila') as date,
+  a.product,
+  ba.name as bank_name,
+  b.account_name,
+  to_base64(sha512(b.account_number)) as account_number
+FROM ${ref("dim_customer_accounts")} a
+  JOIN bank_accounts b ON b.party_id = SAFE_CAST(a.account_id AS INT) --AND b.latest = 1
+  JOIN  ${ref({schema: "base_f3", name: "core_banks"})} ba ON ba.id = b.bank_id
+WHERE a.product IN ('GOGO', 'GGX Biz', 'XPost','CMO')
