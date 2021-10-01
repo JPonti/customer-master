@@ -47,4 +47,3 @@ SELECT
 FROM ${ref("dim_customer_accounts")} a
 JOIN ${ref({schema: "base_firebase", name: "users"})} u ON a.firebase_id = u.user_id
 )
-ORDER BY date DESC
