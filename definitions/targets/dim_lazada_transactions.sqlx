@@ -20,4 +20,4 @@ FROM ${ref({schema: "base_f3", name: "consumer_orders"})} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = o.return_address_id
 WHERE service_id IN (215744) AND c.product IN ('Lazada') 
 ${when(incremental(), ` AND o.id NOT IN (SELECT transaction_id FROM ${self()})
-  AND DATE(base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+  AND DATE(base_loaded_at) >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}

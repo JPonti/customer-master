@@ -24,8 +24,8 @@ FROM ${ref({schema: "base_f3", name: "consumer_orders"})} o
 -- JOIN `data-pipeline-241307.base_f3.core_organizations` org ON org.party_id = o.service_id
 JOIN ${ref({schema: "base_f3", name: "core_organizations"})} org ON org.party_id = o.service_id
 WHERE o.party_id IN (6,317799,661556)
-${when(incremental(), `AND  DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)
-  AND org.name NOT IN (SELECT product FROM ${self()} WHERE account_id = SAFE_CAST(JSON_EXTRACT_SCALAR(metadata,'$.shop_id') AS INT64))`)}
+${when(incremental(), `AND  DATE(o.base_loaded_at) >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}
+${when(incremental(), `AND org.name NOT IN (SELECT product FROM ${self()} WHERE account_id = SAFE_CAST(JSON_EXTRACT_SCALAR(metadata,'$.shop_id') AS INT64))`)}
     -- AND SAFE_CAST(JSON_EXTRACT_SCALAR(metadata,'$.shop_id') AS INT64) NOT IN (SELECT account_id FROM ${self()})
 GROUP BY 1,2,3,6
 

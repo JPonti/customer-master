@@ -19,4 +19,4 @@ SELECT
 FROM ${ref({schema: "base_shippingcart", name: "app_orders"})} o
 JOIN ${ref("dim_customer_accounts")} c ON SAFE_CAST(c.account_id AS INT) = o.party_id AND c.product = 'ShippingCart'
 ${when(incremental(), ` WHERE o.id NOT IN (SELECT transaction_id FROM ${self()})
-  AND DATE(base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+  AND DATE(base_loaded_at) >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}

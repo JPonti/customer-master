@@ -5,7 +5,7 @@ config {
   bigquery: {
     partitionBy: "registration_date",
     updatePartitionFilter:
-        "registration_date >= date_sub(CURRENT_DATE('Asia/Manila'), interval 6 MONTH)"
+        "registration_date >= date_sub(CURRENT_DATE('Asia/Manila'), interval 1 YEAR)"
   }
 }
 /*NOTES: 
@@ -30,7 +30,7 @@ JOIN ${ref("dim_customer_master")} m ON a.firebase_id = m.firebase_id
 WHERE a.product IN ('GOGO', 'XPay', 'XPost', 'Paylink', 'GGX Biz')
   AND a.firebase_id IS NOT NULL AND COALESCE(CAST(a.account_id AS STRING),'') <> '' 
   AND m.product IS NULL
-${when(incremental(), `AND a.registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+${when(incremental(), `AND a.registration_date >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}
 
 UNION DISTINCT 
 
@@ -52,7 +52,7 @@ FROM (
 JOIN ${ref("dim_customer_master")} m ON CAST(a.account_id AS STRING) = CAST(m.account_id AS STRING) AND a.product = COALESCE(m.product, a.product)
 WHERE a.product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost', 'GGX Biz', 'CMO','LBC Online (Account 1)','LBC Online (Account 2)','Lazada')
   AND COALESCE(a.firebase_id,'') = '' AND a.account_id IS NOT NULL
-${when(incremental(), `AND a.registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+${when(incremental(), `AND a.registration_date >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}
 
 UNION DISTINCT
 
@@ -67,5 +67,5 @@ JOIN ${ref("dim_customer_master")} m ON CAST(a.account_id AS STRING) = CAST(m.ac
 WHERE a.product IN ('ShippingCart')
   AND COALESCE(a.firebase_id,'') = '' AND a.account_id IS NOT NULL
   AND m.product IS NOT NULL
-${when(incremental(), `AND a.registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+${when(incremental(), `AND a.registration_date >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}
 

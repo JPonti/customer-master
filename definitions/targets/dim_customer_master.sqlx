@@ -66,4 +66,4 @@ FROM (
   GROUP BY 1,2,3
 )
 -- ${when(incremental(), `where latest_registration_time > (select max(latest_registration_time) from ${self()})`)}
-${when(incremental(), `WHERE latest_registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+${when(incremental(), `WHERE latest_registration_date >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}

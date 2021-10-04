@@ -2,5 +2,8 @@
     "warehouse": "bigquery",
     "defaultSchema": "customer",
     "assertionSchema": "dataform_assertions",
-    "defaultDatabase": "data-master-staging"
+    "defaultDatabase": "data-master-staging",
+    "vars": {
+    "start_date": "DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)"
+    }
 }

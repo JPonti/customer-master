@@ -15,4 +15,4 @@ JOIN `data-insights-176500.base_cmo.core_users` u ON u.party_id = p.id
 LEFT JOIN  ${resolve({schema: "base_f3", name: "core_parties"})} f on f.external_id = p.uuid
  WHERE u.email NOT LIKE 'test+%'
   AND u.email NOT IN (SELECT email FROM ${ref("t_test_accounts")} WHERE product = 'CMO')
- ${when(incremental(), `AND DATE(p.created_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+ ${when(incremental(), `AND DATE(p.created_at) >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}

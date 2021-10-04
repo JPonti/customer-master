@@ -30,6 +30,5 @@ WHERE p.type = 'user'
   10600, --etan test account
   173796, --sc uat acct
   1743) --Test Koko Domingo
-  ${when(incremental(), `AND DATE(p.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
-
+  ${when(incremental(), `AND DATE(p.base_loaded_at) >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}
 

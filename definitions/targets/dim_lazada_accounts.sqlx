@@ -18,7 +18,7 @@ FROM ${ref({schema: "base_f3", name: "consumer_orders"})} o
 JOIN ${ref({schema: "base_f3", name: "core_organizations"})} org ON org.party_id = o.service_id
 JOIN ${ref({schema: "base_f3", name: "core_addresses"})} a ON o.return_address_id = a.id
 WHERE service_id IN (215744) AND a.name NOT LIKE 'Lazada%' AND a.name NOT IN ('Cabuyao WH','CB WH Reverse')
-${when(incremental(), `AND  DATE(o.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)
-  AND o.return_address_id NOT IN (SELECT account_id FROM ${self()})`)}
+${when(incremental(), `AND  DATE(o.base_loaded_at) >=`)} ${when(incremental(), dataform.projectConfig.vars.start_date)}
+${when(incremental(), `AND o.return_address_id NOT IN (SELECT account_id FROM ${self()})`)}
 GROUP BY 1,2,3,6
 

@@ -42,8 +42,8 @@ SELECT
   COALESCE(p.id, CAST(NULL AS INT)) AS account_id,
   COALESCE(f.user_id,p.external_id ) as firebase_id,
   'merchant' as customer_type,
-  DATE(LEAST(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)), COALESCE(p.created_at,PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)))),'Asia/Manila') as registration_date,
-  DATETIME(LEAST(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)), COALESCE(p.created_at,PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)))),'Asia/Manila') as registration_time,
+  DATE(GREATEST(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)), COALESCE(p.created_at,PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)))),'Asia/Manila') as registration_date,
+  DATETIME(GREATEST(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)), COALESCE(p.created_at,PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)))),'Asia/Manila') as registration_time,
   'GOGO' as product  --hardcoded because of signed_up_at_gogoxpress filter NOT NULL
 FROM users f
 LEFT JOIN ${ref({schema: "base_f3", name: "core_parties"})} p ON p.external_id = f.user_id 
@@ -58,8 +58,8 @@ SELECT
   COALESCE(p.id, CAST(NULL AS INT)) AS account_id,
   COALESCE(f.user_id,p.external_id ) as firebase_id,
   'merchant' as customer_type,
-  DATE(LEAST(p.created_at, COALESCE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)), p.created_at)),'Asia/Manila') as registration_date,
-  DATETIME(LEAST(p.created_at, COALESCE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)), p.created_at)),'Asia/Manila') as registration_time,
+  DATE(GREATEST(p.created_at, COALESCE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)), p.created_at)),'Asia/Manila') as registration_date,
+  DATETIME(GREATEST(p.created_at, COALESCE(PARSE_TIMESTAMP('%a, %d %b %Y %H:%M:%S',SUBSTR(signed_up_at_gogoxpress ,1,25)), p.created_at)),'Asia/Manila') as registration_time,
   o.name as product,
 FROM ${ref({schema: "base_f3", name: "core_parties"})} p
 JOIN ${ref({schema: "base_f3", name: "core_relationships"})} r ON r.from_party_id = p.id AND r.to_party_id = 215085
@@ -67,7 +67,9 @@ LEFT JOIN users f ON p.external_id = f.user_id AND seq = 1 --AND signed_up_at_go
 LEFT JOIN ${ref({schema: "base_f3", name: "core_organizations"})} o ON o.party_id = r.to_party_id
 LEFT JOIN ${ref("t_test_accounts")} t ON t.email = f.email AND product = 'Gogo'
 WHERE r.from_party_id IS NOT NULL AND t.email IS NULL
-  ${when(incremental(), `AND DATE(p.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
-
+  -- ${when(incremental(), `AND DATE(p.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+  ${when(incremental(), `AND DATE(p.base_loaded_at) >=`)} ${when(incremental(), dataform.projectConfig.vars.start_date)}
+  
+  
 )
 

@@ -13,7 +13,7 @@ SELECT *,
        ROW_NUMBER() OVER (PARTITION BY party_id ORDER BY updated_at DESC) latest
   FROM  `data-pipeline-241307.base_f3.core_bank_accounts`
 --  WHERE preferred = true
- ${when(incremental(), `WHERE DATE(base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+ ${when(incremental(), `WHERE DATE(base_loaded_at) >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}
 )
 
 SELECT

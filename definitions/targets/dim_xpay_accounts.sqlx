@@ -22,7 +22,7 @@ SELECT
   ROW_NUMBER() OVER(PARTITION BY id ORDER BY kafka_streamed_at desc) AS seq,
   kafka_streamed_at
 FROM ${ref("prod_merchants_v3")}
-${when(incremental(), `WHERE DATE(kafka_streamed_at ) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+${when(incremental(), `WHERE DATE(kafka_streamed_at ) >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}
 )
 ,users as (
 SELECT id user_id,

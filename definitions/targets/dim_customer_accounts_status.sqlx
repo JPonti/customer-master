@@ -41,7 +41,7 @@ FROM ${ref("dim_customer_accounts")} a
           GROUP BY 1,2
         )status_history ON status_history.id = SAFE_CAST(a.account_id AS INT)
 WHERE a.product IN ('GOGO','XPost', 'GGX Biz', 'CMO')
-  ${when(incremental(), `AND DATE(p.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
+  ${when(incremental(), `AND DATE(p.base_loaded_at) >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}
 
 UNION DISTINCT
 SELECT 
@@ -54,5 +54,5 @@ FROM ${ref("dim_customer_accounts")} a
   JOIN bank_accounts as b ON b.party_id = SAFE_CAST(a.account_id AS INT) AND b.latest = 1
   JOIN  blacklisted_accounts bl on bl.account_number= b.account_number
 WHERE a.product IN ('GOGO','XPost', 'GGX Biz', 'CMO')
-  ${when(incremental(), `AND DATE(p.base_loaded_at) >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)} 
+  ${when(incremental(), `AND DATE(p.base_loaded_at) >= `)} ${when(incremental(), dataform.projectConfig.vars.start_date)}
 )
