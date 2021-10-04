@@ -10,6 +10,7 @@ config {
 SELECT 
   c.customer_guid,
   c.product,
+  c.account_id,
   id as transaction_id,
   DATE(o.created_at, 'Asia/Manila') as transaction_date,
   CAST(NULL as INT) pickup_address_id,

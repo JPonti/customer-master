@@ -13,6 +13,7 @@ SELECT
         WHEN o.party_id = 317799 THEN 'Shopee (Tiered Pricing)'
         WHEN o.party_id = 661556 THEN 'SHP (Reverse Logistics)'
       END as product,
+  c.account_id,
   id as transaction_id,
   DATE(o.created_at, 'Asia/Manila') as transaction_date,
   o.pickup_address_id,
@@ -32,6 +33,7 @@ SELECT
         WHEN o.party_id = 317799 THEN 'Shopee (Tiered Pricing)'
         WHEN o.party_id = 661556 THEN 'SHP (Reverse Logistics)'
       END as product,
+  c.account_id,
   id as transaction_id,
   DATE(o.created_at, 'Asia/Manila') as transaction_date,
   o.pickup_address_id,
@@ -50,6 +52,7 @@ SELECT
         WHEN o.party_id = 317799 THEN 'Shopee (Tiered Pricing)'
         WHEN o.party_id = 661556 THEN 'SHP (Reverse Logistics)'
       END as product,
+  c.account_id,
   id as transaction_id,
   DATE(o.created_at, 'Asia/Manila') as transaction_date,
   o.pickup_address_id,

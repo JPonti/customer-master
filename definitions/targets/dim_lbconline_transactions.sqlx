@@ -12,6 +12,7 @@ SELECT
   CASE WHEN o.party_id = 323063 THEN 'LBC Online (Account 1)'
         WHEN o.party_id = 323064 THEN 'LBC Online (Account 2)'
       END as product,
+  c.account_id,
   id as transaction_id,
   DATE(o.created_at, 'Asia/Manila') as transaction_date,
   o.pickup_address_id,
