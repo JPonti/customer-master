@@ -14,13 +14,13 @@ SELECT
 -- from ${ref("dim_customer_master_view")}
 FROM (
   SELECT
-    CASE WHEN product = 'ShippingCart' THEN product ELSE NULL END as product,
-    account_id,
+    CASE WHEN a.product = 'ShippingCart' THEN a.product ELSE NULL END as product,
+    a.account_id,
     CAST(NULL AS STRING) as  firebase_id,
-    MIN(registration_date) as earliest_registration_date,
-    MAX(registration_date) as latest_registration_date,
-    MIN(registration_time) as earliest_registration_time,
-    MAX(registration_time) as latest_registration_time
+    MIN(a.registration_date) as earliest_registration_date,
+    MAX(a.registration_date) as latest_registration_date,
+    MIN(a.registration_time) as earliest_registration_time,
+    MAX(a.registration_time) as latest_registration_time
   FROM 
   (
     SELECT * from ${ref("dim_shopee_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
@@ -34,10 +34,11 @@ FROM (
     SELECT * from ${ref("dim_lazada_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
     UNION DISTINCT
     SELECT * from ${ref("dim_shippingcart_accounts")} ${when(incremental(), `WHERE registration_date >= DATE_SUB(CURRENT_DATE('Asia/Manila'), interval 1 DAY)`)}
-  )
-  WHERE product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost','GGX Biz', 'CMO', 'LBC Online (Account 1)','LBC Online (Account 2)','Lazada','ShippingCart')
-      AND firebase_id IS NULL AND account_id IS NOT NULL
-      ${when(incremental(), `AND account_id NOT IN (SELECT account_id FROM ${self()} WHERE account_id IS NOT NULL)`)}
+  )a
+   ${when(incremental(), `LEFT JOIN ${self()} m ON COALESCE(m.product,a.product) = a.product AND m.account_id = a.account_id`)}
+  WHERE a.product IN ('Shopee', 'SHP (Reverse Logistics)', 'Shopee (Tiered Pricing)', 'XPost','GGX Biz', 'CMO', 'LBC Online (Account 1)','LBC Online (Account 2)','Lazada','ShippingCart')
+      AND a.firebase_id IS NULL AND a.account_id IS NOT NULL
+      ${when(incremental(), `AND m.account_id IS NULL`)}
   GROUP BY 1,2
   UNION DISTINCT
   SELECT
